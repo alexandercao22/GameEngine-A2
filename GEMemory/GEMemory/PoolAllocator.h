@@ -1,19 +1,13 @@
 #pragma once
 
-struct Node
-{
-	int index;
-	int child;
-};
-
 class PoolAllocator
 {
 private:
-	void *adress;
-	int head; // Index of the first free slot
-	int n; // Number of blocks
-	int size; // Size of a block
-	int *nodes;
+	void *_adress;
+	int _head; // Index of the first free slot
+	int _n; // Number of blocks
+	int _size; // Size of a block
+	int *_nodes; // Index of the next used slot
 
 	bool Expand();
 

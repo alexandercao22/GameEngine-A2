@@ -13,7 +13,8 @@ PoolAllocator::~PoolAllocator()
 
 bool PoolAllocator::Init(int n, int size)
 {
-
+	
+	return false;
 }
 
 void *PoolAllocator::Request()
