@@ -3,11 +3,11 @@
 class PoolAllocator
 {
 private:
-	void *_adress;
-	int _head; // Index of the first free slot
-	int _n; // Number of blocks
-	int _size; // Size of a block
-	int *_nodes; // Index of the next used slot
+	void *_adress = nullptr;
+	int _head = 0; // Index of the first free slot
+	int _n = -1; // Number of blocks
+	int _size = -1; // Size of a block
+	int *_nodes = nullptr; // Indices of the next used slot
 
 	bool Expand();
 
