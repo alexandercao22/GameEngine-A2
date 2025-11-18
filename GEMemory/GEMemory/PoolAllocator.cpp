@@ -60,10 +60,16 @@ bool PoolAllocator::Free(void *element)
 		return false;
 	}
 
-	int prevHead = _head;
-	_head = byteDiff / _size;
-	_nodes[_head].free = true;
-	_nodes[_head].next = prevHead;
+	int index = byteDiff / _size;
+
+	if (_nodes[index].free) {
+		std::cerr << "PoolAllocator::Free(): memory is already free";
+		return false;
+	}
+
+	_nodes[index].free = true;
+	_nodes[index].next = _head;
+	_head = index;
 
 	return true;
 }
