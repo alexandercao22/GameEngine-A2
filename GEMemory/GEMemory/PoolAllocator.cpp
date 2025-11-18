@@ -1,6 +1,7 @@
 #include "PoolAllocator.h"
 
 #include <malloc.h>
+#include <iostream>
 
 bool PoolAllocator::Expand()
 {
@@ -43,6 +44,26 @@ void *PoolAllocator::Request()
 
 bool PoolAllocator::Free(void *element)
 {
+	if (element == nullptr) {
+		std::cerr << "PoolAllocator::Free(): pointer is nullptr";
+		return false;
+	}
 
-	return false;
+	// Casting to char pointer to allow for byte-wise arithmetics
+	char* startAddress = static_cast<char*>(_address);
+	char* offsetAddress = static_cast<char*>(element);
+	ptrdiff_t byteDiff = offsetAddress - startAddress;
+
+	// Bounds safety check
+	if (byteDiff < 0 || byteDiff % _size != 0 || byteDiff >= _n * _size) {
+		std::cerr << "PoolAllocator::Free(): pointer not in pool";
+		return false;
+	}
+
+	int prevHead = _head;
+	_head = byteDiff / _size;
+	_nodes[_head].free = true;
+	_nodes[_head].next = prevHead;
+
+	return true;
 }
