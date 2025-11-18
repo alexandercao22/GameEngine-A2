@@ -45,7 +45,7 @@ void *PoolAllocator::Request()
 bool PoolAllocator::Free(void *element)
 {
 	if (element == nullptr) {
-		std::cerr << "PoolAllocator::Free(): pointer is nullptr";
+		std::cerr << "PoolAllocator::Free(): pointer is nullptr" << std::endl;
 		return false;
 	}
 
@@ -56,14 +56,14 @@ bool PoolAllocator::Free(void *element)
 
 	// Bounds safety check
 	if (byteDiff < 0 || byteDiff % _size != 0 || byteDiff >= _n * _size) {
-		std::cerr << "PoolAllocator::Free(): pointer not in pool";
+		std::cerr << "PoolAllocator::Free(): pointer not in pool" << std::endl;
 		return false;
 	}
 
 	int index = byteDiff / _size;
 
 	if (_nodes[index].free) {
-		std::cerr << "PoolAllocator::Free(): memory is already free";
+		std::cerr << "PoolAllocator::Free(): memory is already free" << std::endl;
 		return false;
 	}
 
