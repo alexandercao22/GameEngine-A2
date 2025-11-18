@@ -11,7 +11,11 @@ bool PoolAllocator::Expand()
 
 PoolAllocator::~PoolAllocator()
 {
+	free(_address);
+	_address = nullptr;
 
+	free(_nodes);
+	_address = nullptr;
 }
 
 bool PoolAllocator::Init(int n, int size)
