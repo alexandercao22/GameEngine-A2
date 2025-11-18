@@ -1,19 +1,26 @@
 #pragma once
+#include <vector>
 
 struct Node {
-	bool free;	// true if part of the list, otherwise false
-	int next;	// index of next node in the linked list
+	bool free;	// True if part of the list, otherwise false
+	int next;	// Index of next node in the linked list
+};
+
+struct Block {
+	void* address = nullptr;
+	Node* nodes = nullptr;	// Pool slots tracker
+	int head ;	// Index of the first free slot (-1 means no empty slots)
 };
 
 class PoolAllocator
 {
 private:
-	void *_address = nullptr;
-	int _head = 0; // Index of the first free slot
-	int _n = -1; // Number of blocks
-	int _size = -1; // Size of a block
-	Node *_nodes = nullptr; // Indices of the next used slot
+	std::vector<Block> _blocks;
 
+	int _n = -1;	// Number of slots contained in a single block (-1 = uninitialized)
+	int _size = -1;	// Size of the slots in the pool (-1 = uninitialized)
+
+	bool InitBlock(Block *block);
 	bool Expand();
 
 public:

@@ -3,19 +3,55 @@
 #include <malloc.h>
 #include <iostream>
 
+bool PoolAllocator::InitBlock(Block *block)
+{
+	block->address = malloc(static_cast<size_t>(_n * _size));
+	if (!block->address) {
+		std::cerr << "PoolAllocator::InitBlock(): failed to allocate pool block" << std::endl;
+		return false;
+	}
+
+	block->nodes = (Node*)malloc(static_cast<size_t>(_n) * sizeof(Node));
+	if (!block->nodes) {
+		std::cerr << "PoolAllocator::InitBlock(): failed to allocate nodes" << std::endl;
+		free(block->address);
+		block->address = nullptr;
+		return false;
+	}
+
+	block->head = 0;
+	for (int i = 0; i < _n; i++)
+	{
+		block->nodes[i].free = true;
+		if (i == _n - 1) block->nodes[i].next = -1;
+		else block->nodes[i].next = i + 1;
+	}
+
+	return true;
+}
+
 bool PoolAllocator::Expand()
 {
+	Block newBlock;
+	if (!InitBlock(&newBlock)) {
+		std::cerr << "PoolAllocator::Expand(): Failed creating new pool block" << std::endl;
+		return false;
+	}
 
-	return false;
+	_blocks.push_back(newBlock);
+
+	return true;
 }
 
 PoolAllocator::~PoolAllocator()
 {
-	free(_address);
-	_address = nullptr;
+	for (Block& block : _blocks) {
+		free(block.address);
+		block.address = nullptr;
 
-	free(_nodes);
-	_address = nullptr;
+		free(block.nodes);
+		block.nodes = nullptr;
+	}
 }
 
 bool PoolAllocator::Init(int n, int size)
@@ -23,33 +59,24 @@ bool PoolAllocator::Init(int n, int size)
 	_n = n;
 	_size = size;
 
-	_address = malloc(static_cast<size_t>(n * size));
-	if (!_address) {
-		std::cerr << "PoolAllocator::Init(): failed to allocate pool" << std::endl;
+	Block block;
+	if (!InitBlock(&block)) {
+		std::cerr << "PoolAllocator::Init(): Failed creating initial pool block" << std::endl;
+		// Reset member values to indicate that the Allocator is still uninitialized
+		_n = -1;
+		_size = -1;
 		return false;
 	}
 
-	_nodes = (Node*)malloc(static_cast<size_t>(n) * sizeof(Node));
-	if (!_nodes) {
-		std::cerr << "PollAllocator::Init(): failed to allocate nodes" << std::endl;
-		free(_address);
-		_address = nullptr;
-		return false;
-	}
-
-	_head = 0;
-	for (int i = 0; i < n; i++)
-	{
-		_nodes[i].free = true;
-		if (i == n - 1) _nodes[i].next = -1;
-		else _nodes[i].next = i + 1;
-	}
+	_blocks.push_back(block);
 
 	return true;
 }
 
 void *PoolAllocator::Request()
 {
+	// Should use Expand() to create a new block if all current blocks are full
+	// Additionally, new allocations should be placed in the first block with empty slots :)
 
 	return nullptr;
 }
@@ -57,31 +84,44 @@ void *PoolAllocator::Request()
 bool PoolAllocator::Free(void *element)
 {
 	if (element == nullptr) {
-		std::cerr << "PoolAllocator::Free(): pointer is nullptr" << std::endl;
+		std::cerr << "PoolAllocator::Free(): input pointer is nullptr" << std::endl;
 		return false;
 	}
 
-	// Casting to char pointer to allow for byte-wise arithmetics
-	char* startAddress = static_cast<char*>(_address);
-	char* offsetAddress = static_cast<char*>(element);
-	ptrdiff_t byteDiff = offsetAddress - startAddress;
+	for (Block& block : _blocks) {
 
-	// Bounds safety check
-	if (byteDiff < 0 || byteDiff % _size != 0 || byteDiff >= _n * _size) {
-		std::cerr << "PoolAllocator::Free(): pointer not in pool" << std::endl;
-		return false;
+		// Casting to char pointer to allow for byte-wise arithmetics
+		char* startAddress = static_cast<char*>(block.address);
+		char* elementAddress = static_cast<char*>(element);
+		ptrdiff_t byteDiff = elementAddress - startAddress;
+
+		// Block bounds check (is element in this block?)
+		if (byteDiff < 0 || byteDiff >= _n * _size) {
+			continue;
+		}
+
+		// Alignment safety check
+		if (byteDiff % _size != 0) {
+			std::cerr << "PoolAllocator::Free(): input pointer is misaligned with the pool" << std::endl;
+			return false;
+		}
+
+		int index = byteDiff / _size;
+
+		// Double free safety check
+		if (block.nodes[index].free) {
+			std::cerr << "PoolAllocator::Free(): memory is already free" << std::endl;
+			return false;
+		}
+
+		block.nodes[index].free = true;
+		block.nodes[index].next = block.head;
+		block.head = index;
+
+		return true;
 	}
 
-	int index = byteDiff / _size;
-
-	if (_nodes[index].free) {
-		std::cerr << "PoolAllocator::Free(): memory is already free" << std::endl;
-		return false;
-	}
-
-	_nodes[index].free = true;
-	_nodes[index].next = _head;
-	_head = index;
-
-	return true;
+	// Input pointer was not within the range of any block
+	std::cerr << "PoolAllocator::Free(): Input pointer does not belong to this pool" << std::endl;
+	return false;
 }
