@@ -18,7 +18,7 @@ bool PoolAllocator::Init(int n, int size)
 	_n = n;
 	_size = size;
 
-	_adress = malloc(static_cast<size_t>(n * size));
+	_address = malloc(static_cast<size_t>(n * size));
 	_nodes = (int*)malloc(static_cast<size_t>(n * sizeof(int)));
 
 	if (_nodes != nullptr)
@@ -29,7 +29,7 @@ bool PoolAllocator::Init(int n, int size)
 		}
 	}
 
-	return _adress != nullptr && _nodes != nullptr;
+	return _address != nullptr && _nodes != nullptr;
 }
 
 void *PoolAllocator::Request()
