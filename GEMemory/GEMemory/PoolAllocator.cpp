@@ -78,6 +78,36 @@ void *PoolAllocator::Request()
 	// Should use Expand() to create a new block if all current blocks are full
 	// Additionally, new allocations should be placed in the first block with empty slots :)
 
+	for (int i = 0; i < _blocks.size(); i++) {
+		
+		Block& block = _blocks[i];
+
+		// Get index of first free node
+		int index = block.head;
+
+		// Check if list was full
+		// Add new block and jump to next iteration of blocks
+		if (index == -1) {
+			Expand();
+			continue;
+		}
+
+		// Double check if the space is free or not
+		if (block.nodes[index].free == false) {
+			index = block.nodes[index].next;
+		}
+
+		// Set requested block as taken and update head node
+		block.nodes[index].free = false;
+		block.head = block.nodes[index].next;
+
+
+		int memorySpace = index * _size;
+
+		return static_cast<char*>(block.address) + memorySpace; 
+		
+	}
+
 	return nullptr;
 }
 
@@ -124,4 +154,8 @@ bool PoolAllocator::Free(void *element)
 	// Input pointer was not within the range of any block
 	std::cerr << "PoolAllocator::Free(): Input pointer does not belong to this pool" << std::endl;
 	return false;
+}
+
+void* PoolAllocator::GetAdress() {
+	return _blocks[0].address;
 }

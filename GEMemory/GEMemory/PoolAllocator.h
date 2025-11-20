@@ -29,6 +29,7 @@ public:
 	bool Init(int n, int size);
 	void *Request(); // Get the first free slot
 	bool Free(void *element);
+	void* GetAdress();
 
 };
 
