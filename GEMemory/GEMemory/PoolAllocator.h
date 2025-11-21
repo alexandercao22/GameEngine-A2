@@ -28,8 +28,10 @@ private:
 public:
 	PoolAllocator() = default;
 	~PoolAllocator();
-	bool Init(int n, int size, bool aligned = false); // If aligned is true, initial memory is set on size % = 0
-	void *Request(); // Get the first free slot
+	// If aligned is true, initial memory is set on size % = 0
+	bool Init(int n, int size, bool aligned = false);
+	// Get the first free slot
+	void *Request();
 	bool Free(void *element);
 	void* GetAdress();
 
