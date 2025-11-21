@@ -5,7 +5,12 @@
 
 bool PoolAllocator::InitBlock(Block *block)
 {
-	block->address = malloc(static_cast<size_t>(_n * _size));
+	if (_aligned) {
+		block->address = _aligned_malloc(static_cast<size_t>(_n * _size), _size);
+	}
+	else {
+		block->address = malloc(static_cast<size_t>(_n * _size));
+	}
 	if (!block->address) {
 		std::cerr << "PoolAllocator::InitBlock(): failed to allocate pool block" << std::endl;
 		return false;
@@ -45,7 +50,12 @@ bool PoolAllocator::Expand()
 PoolAllocator::~PoolAllocator()
 {
 	for (Block& block : _blocks) {
-		free(block.address);
+		if (_aligned) {
+			_aligned_free(block.address);
+		}
+		else {
+			free(block.address);
+		}
 		block.address = nullptr;
 
 		free(block.nodes);
@@ -53,10 +63,11 @@ PoolAllocator::~PoolAllocator()
 	}
 }
 
-bool PoolAllocator::Init(int n, int size)
+bool PoolAllocator::Init(int n, int size, bool aligned)
 {
 	_n = n;
 	_size = size;
+	_aligned = aligned;
 
 	Block block;
 	if (!InitBlock(&block)) {

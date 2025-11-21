@@ -5,25 +5,37 @@ struct Enemy
 {
 	float health = 100.0f;
 	int legs = 3;
+	char tag = 'a';
 };
 
 int main() {
 	std::cout << "Hello World!" << std::endl;
 
 	PoolAllocator firstPool;
-	firstPool.Init(5, sizeof(Enemy));
+	firstPool.Init(5, 9);
+	PoolAllocator secondPool;
+	secondPool.Init(5, 32, true);
 
 	std::cout << "Första pointers adress: " << firstPool.GetAdress() << std::endl;
 
 	Enemy* firstPtr = (Enemy *)firstPool.Request();
 	firstPtr->health = 69.67f;
 	firstPtr->legs = 2;
+	firstPtr->tag = 'b';
 
 	std::cout << "First value: " << firstPtr->health << std::endl;
+	std::cout << "First value: " << firstPtr->legs << std::endl;
+	std::cout << "First value: " << firstPtr->tag << std::endl;
 	std::cout << "Första pointers adress: " << firstPtr << std::endl;
 
-	void* secondPtr = firstPool.Request();
+	Enemy *secondPtr = (Enemy *)firstPool.Request();
+	firstPtr->health = 12.34f;
+	firstPtr->legs = 27;
+	firstPtr->tag = 'y';
 
+	std::cout << "Second value: " << firstPtr->health << std::endl;
+	std::cout << "Second value: " << firstPtr->legs << std::endl;
+	std::cout << "Second value: " << firstPtr->tag << std::endl;
 	std::cout << "Andra pointers adress: " << secondPtr << std::endl;
 
 	void* thirdPtr = firstPool.Request();
@@ -48,6 +60,8 @@ int main() {
 	void* seventhPtr = firstPool.Request();
 	
 	std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
+
+	std::cout << "SecondPool: " << secondPool.GetAdress() << std::endl;
 
 
 	return 0;
