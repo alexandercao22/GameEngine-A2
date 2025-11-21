@@ -1,1 +1,6 @@
 Kollar om Emil är git guden
+
+TODO:
+Test environment for all allocators
+Buddy allocator
+Memory tracking
