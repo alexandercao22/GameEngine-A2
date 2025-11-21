@@ -88,7 +88,13 @@ void *PoolAllocator::Request()
 		// Check if list was full
 		// Add new block and jump to next iteration of blocks
 		if (index == -1) {
-			Expand();
+			
+			if (i == _blocks.size() - 1) {
+				if (!Expand()) {
+					std::cerr << "PoolAllocator::Request(): failed to allocate new  block" << std::endl;
+					return nullptr;
+				}
+			}
 			continue;
 		}
 
@@ -105,7 +111,6 @@ void *PoolAllocator::Request()
 		int memorySpace = index * _size;
 
 		return static_cast<char*>(block.address) + memorySpace; 
-		
 	}
 
 	return nullptr;
