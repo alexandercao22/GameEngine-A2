@@ -1,18 +1,25 @@
 #include <iostream>
 #include "PoolAllocator.h"
 
+struct Enemy
+{
+	float health = 100.0f;
+	int legs = 3;
+};
 
 int main() {
 	std::cout << "Hello World!" << std::endl;
 
 	PoolAllocator firstPool;
-	firstPool.Init(5, 8);
-
+	firstPool.Init(5, sizeof(Enemy));
 
 	std::cout << "Första pointers adress: " << firstPool.GetAdress() << std::endl;
 
-	void* firstPtr = firstPool.Request();
+	Enemy* firstPtr = (Enemy *)firstPool.Request();
+	firstPtr->health = 69.67f;
+	firstPtr->legs = 2;
 
+	std::cout << "First value: " << firstPtr->health << std::endl;
 	std::cout << "Första pointers adress: " << firstPtr << std::endl;
 
 	void* secondPtr = firstPool.Request();

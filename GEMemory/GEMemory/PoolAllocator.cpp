@@ -20,8 +20,7 @@ bool PoolAllocator::InitBlock(Block *block)
 	}
 
 	block->head = 0;
-	for (int i = 0; i < _n; i++)
-	{
+	for (int i = 0; i < _n; i++) {
 		block->nodes[i].free = true;
 		if (i == _n - 1) block->nodes[i].next = -1;
 		else block->nodes[i].next = i + 1;
