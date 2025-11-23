@@ -23,6 +23,9 @@ private:
 	std::unordered_map<void*, Allocation> _allocations;
 
 public:
+	MemoryTracker() = default;
+	~MemoryTracker() = default;
+
 	// Records a new allocation
 	void StartTracking(Allocator allocator, void* ptr, size_t size, std::string tag);
 	// Removes an allocation from the record
