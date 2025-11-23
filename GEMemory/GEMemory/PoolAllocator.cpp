@@ -83,7 +83,7 @@ bool PoolAllocator::Init(int n, int size, bool aligned)
 	return true;
 }
 
-void *PoolAllocator::Request()
+void *PoolAllocator::Request(std::string tag)
 {
 	// Should use Expand() to create a new block if all current blocks are full
 	// Additionally, new allocations should be placed in the first block with empty slots :)
@@ -119,16 +119,21 @@ void *PoolAllocator::Request()
 
 
 		int memorySpace = index * _size;
+		void* ptr = static_cast<char*>(block.address) + memorySpace;
 
-		return static_cast<char*>(block.address) + memorySpace; 
+		if (TRACK_MEMORY) {
+			MemoryTracker::Instance().StartTracking(Allocator::Pool, ptr, _size, tag);
+		}
+
+		return ptr;
 	}
 
 	return nullptr;
 }
 
-bool PoolAllocator::Free(void *element)
+bool PoolAllocator::Free(void *ptr)
 {
-	if (element == nullptr) {
+	if (ptr == nullptr) {
 		std::cerr << "PoolAllocator::Free(): input pointer is nullptr" << std::endl;
 		return false;
 	}
@@ -137,7 +142,7 @@ bool PoolAllocator::Free(void *element)
 
 		// Casting to char pointer to allow for byte-wise arithmetics
 		char* startAddress = static_cast<char*>(block.address);
-		char* elementAddress = static_cast<char*>(element);
+		char* elementAddress = static_cast<char*>(ptr);
 		ptrdiff_t byteDiff = elementAddress - startAddress;
 
 		// Block bounds check (is element in this block?)
@@ -162,6 +167,10 @@ bool PoolAllocator::Free(void *element)
 		block.nodes[index].free = true;
 		block.nodes[index].next = block.head;
 		block.head = index;
+
+		if (TRACK_MEMORY) {
+			MemoryTracker::Instance().StopTracking(ptr);
+		}
 
 		return true;
 	}

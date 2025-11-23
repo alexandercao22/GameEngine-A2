@@ -1,5 +1,9 @@
 #pragma once
+#include "MemoryTracker.h"
 #include <vector>
+#include <string>
+
+#define TRACK_MEMORY true
 
 struct Node {
 	bool free;	// True if part of the list, otherwise false
@@ -31,7 +35,7 @@ public:
 	// If aligned is true, initial memory is set on size % = 0
 	bool Init(int n, int size, bool aligned = false);
 	// Get the first free slot
-	void *Request();
+	void *Request(std::string tag = "No tag");
 	bool Free(void *element);
 	void* GetAdress();
 
