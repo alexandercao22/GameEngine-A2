@@ -20,12 +20,21 @@ struct Allocation {
 class MemoryTracker 
 {
 private:
+	MemoryTracker() = default;
+	~MemoryTracker() = default;
+
 	// Keeps track of all tracked allocations using their pointers as keys for quick lookup
 	std::unordered_map<void*, Allocation> _allocations;
 
 public:
-	MemoryTracker() = default;
-	~MemoryTracker() = default;
+	// Singleton instance
+	static MemoryTracker& Instance() {
+		static MemoryTracker instance;
+		return instance;
+	}
+	// Copy prevention
+	MemoryTracker(const MemoryTracker&) = delete;
+	MemoryTracker& operator=(const MemoryTracker&) = delete;
 
 	// Records a new allocation
 	void StartTracking(Allocator allocator, void* ptr, size_t size, std::string tag);
