@@ -42,5 +42,8 @@ public:
 	void StopTracking(void* ptr);
 
 	// UI functionality
+
+	// Debug functionality
+	bool GetAllocation(void* ptr, Allocation* allocation);
 };
 
