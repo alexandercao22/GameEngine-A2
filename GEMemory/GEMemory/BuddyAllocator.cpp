@@ -56,7 +56,50 @@ bool BuddyAllocator::Init(unsigned int size)
 
 void *BuddyAllocator::Request(unsigned int size)
 {
+		if (size > _buddies[0].size) {
+		std::cerr << "BuddyAllocator::Request(): The requested amount is too large" << std::endl;
+		return nullptr;
+	}
 
+	if (_buddies[0].state == 1) {
+		std::cerr << "BuddyAllocator::Request(): There's no free memory left" << std::endl;
+		return nullptr;
+	}
+
+	int parentIdx = 0;
+	for (int i = 0; i < _numBuddies; i++) {
+		Buddy *current = &_buddies[i];
+		if (size <= current->size / 2) { // Traverse to a fitting buddy size
+			if (current->state == 0) {
+				current->state = 2;
+				parentIdx = i;
+				i = i * 2; // Skip to the next level
+				continue;
+			}
+			else if (current->state == 2) {
+				i = i * 2; // Skip to the next level
+				continue;
+			}
+			else {
+				continue;
+			}
+		}
+		else { // Found a fitting buddy size
+			if (current->state == 0) {
+				std::cout << "Buddy index: " << i << std::endl;
+				current->state = 1;
+				return current->ptr;
+			}
+			else if (current->state == 2) { // Current is split, move on to its buddy
+				continue;
+			}
+			else if (i == parentIdx + 1) {
+				return nullptr;
+			}
+		}
+	}
+
+	return nullptr;
 }
 
 bool BuddyAllocator::Free(void *element)
