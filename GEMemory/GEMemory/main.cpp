@@ -18,50 +18,56 @@ int main() {
 
 	std::cout << "Första pointers adress: " << firstPool.GetAdress(0) << std::endl;
 
-	Enemy* firstPtr = (Enemy *)firstPool.Request();
+	Enemy* firstPtr = (Enemy *)firstPool.Request("First enemy");
 	firstPtr->health = 69.67f;
 	firstPtr->legs = 2;
 	firstPtr->tag = 'b';
 
-	std::cout << "First value: " << firstPtr->health << std::endl;
-	std::cout << "First value: " << firstPtr->legs << std::endl;
-	std::cout << "First value: " << firstPtr->tag << std::endl;
-	std::cout << "Första pointers adress: " << firstPtr << std::endl;
+	Allocation allocation;
+	MemoryTracker::Instance().GetAllocation(firstPtr, &allocation);
+	std::cout << "Allocation tag: " << allocation.tag << std::endl;
 
-	Enemy *secondPtr = (Enemy *)firstPool.Request();
-	firstPtr->health = 12.34f;
-	firstPtr->legs = 27;
-	firstPtr->tag = 'y';
+	firstPool.Free(firstPtr);
 
-	std::cout << "Second value: " << firstPtr->health << std::endl;
-	std::cout << "Second value: " << firstPtr->legs << std::endl;
-	std::cout << "Second value: " << firstPtr->tag << std::endl;
-	std::cout << "Andra pointers adress: " << secondPtr << std::endl;
+	//std::cout << "First value: " << firstPtr->health << std::endl;
+	//std::cout << "First value: " << firstPtr->legs << std::endl;
+	//std::cout << "First value: " << firstPtr->tag << std::endl;
+	//std::cout << "Första pointers adress: " << firstPtr << std::endl;
 
-	void* thirdPtr = firstPool.Request();
+	//Enemy *secondPtr = (Enemy *)firstPool.Request();
+	//firstPtr->health = 12.34f;
+	//firstPtr->legs = 27;
+	//firstPtr->tag = 'y';
 
-	std::cout << "Tredje pointers adress: " << thirdPtr << std::endl;
+	//std::cout << "Second value: " << firstPtr->health << std::endl;
+	//std::cout << "Second value: " << firstPtr->legs << std::endl;
+	//std::cout << "Second value: " << firstPtr->tag << std::endl;
+	//std::cout << "Andra pointers adress: " << secondPtr << std::endl;
 
-	void* fourthPtr = firstPool.Request();
+	//void* thirdPtr = firstPool.Request();
 
-	std::cout << "Fjärde pointers adress: " << fourthPtr << std::endl;
+	//std::cout << "Tredje pointers adress: " << thirdPtr << std::endl;
 
-	void* fifthPtr = firstPool.Request();
+	//void* fourthPtr = firstPool.Request();
 
-	std::cout << "Femte pointers adress: " << fifthPtr << std::endl;
+	//std::cout << "Fjärde pointers adress: " << fourthPtr << std::endl;
 
-	firstPool.Free(secondPtr);
+	//void* fifthPtr = firstPool.Request();
 
-	void* sixthPtr = firstPool.Request();
+	//std::cout << "Femte pointers adress: " << fifthPtr << std::endl;
 
-	std::cout << "Sjätte pointers adress: " << sixthPtr << std::endl;
-	
+	//firstPool.Free(secondPtr);
 
-	void* seventhPtr = firstPool.Request();
-	
-	std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
+	//void* sixthPtr = firstPool.Request();
 
-	std::cout << "SecondPool: " << secondPool.GetAdress(0) << std::endl;
+	//std::cout << "Sjätte pointers adress: " << sixthPtr << std::endl;
+	//
+
+	//void* seventhPtr = firstPool.Request();
+	//
+	//std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
+
+	//std::cout << "SecondPool: " << secondPool.GetAdress(0) << std::endl;
 
 
 	return 0;
