@@ -25,7 +25,7 @@ public:
 	bool Free(void *element);
 
 	void *GetAddress();
-
+	void PrintStates();
 };
 
 // Buddy Allocator:

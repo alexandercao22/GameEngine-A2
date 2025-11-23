@@ -109,6 +109,25 @@ bool BuddyAllocator::Free(void *element)
 
 void *BuddyAllocator::GetAddress()
 {
+	if (!_memory) {
+		std::cerr << "BuddyAllocator::GetAddress(): Buddy allocator is uninitialized" << std::endl;
+		return nullptr;
+	}
 
+	return _memory;
 }
 
+void BuddyAllocator::PrintStates()
+{
+	for (int i = 0; i < _numBuddies; i++) {
+		std::cout << i << " ";
+	}
+	std::cout << std::endl;
+	for (int i = 0; i < _numBuddies; i++) {
+		if (i >= 10) {
+			std::cout << " ";
+		}
+		std::cout << _buddies[i].state << " ";
+	}
+	std::cout << std::endl;
+}
