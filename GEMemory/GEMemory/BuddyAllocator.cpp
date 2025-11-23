@@ -6,7 +6,8 @@
 
 BuddyAllocator::~BuddyAllocator()
 {
-
+	free(_memory);
+	free(_buddies);
 }
 
 bool BuddyAllocator::Init(unsigned int size)
