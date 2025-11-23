@@ -16,7 +16,7 @@ int main() {
 	PoolAllocator secondPool;
 	secondPool.Init(5, 32, true);
 
-	std::cout << "Första pointers adress: " << firstPool.GetAdress() << std::endl;
+	std::cout << "Första pointers adress: " << firstPool.GetAdress(0) << std::endl;
 
 	Enemy* firstPtr = (Enemy *)firstPool.Request();
 	firstPtr->health = 69.67f;
@@ -61,7 +61,7 @@ int main() {
 	
 	std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
 
-	std::cout << "SecondPool: " << secondPool.GetAdress() << std::endl;
+	std::cout << "SecondPool: " << secondPool.GetAdress(0) << std::endl;
 
 
 	return 0;

@@ -37,7 +37,8 @@ public:
 	// Get the first free slot
 	void *Request(std::string tag = "No tag");
 	bool Free(void *element);
-	void* GetAdress();
 
+	// Debug functionality
+	void* GetAdress(size_t index);
 };
 

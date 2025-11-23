@@ -180,6 +180,7 @@ bool PoolAllocator::Free(void *ptr)
 	return false;
 }
 
-void* PoolAllocator::GetAdress() {
-	return _blocks[0].address;
+// Debug
+void* PoolAllocator::GetAdress(size_t index) {
+	return _blocks.at(index).address;
 }
