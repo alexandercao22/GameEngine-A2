@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <chrono>
 
 enum class Allocator {
 	Pool,
@@ -13,7 +14,7 @@ struct Allocation {
 	void* ptr;
 	size_t size;	// Size in bytes
 	std::string tag;	// Tag describing or categorizing the allocation
-	// int creationTime;
+	std::chrono::high_resolution_clock::time_point timestamp; // Creation timestamp
 };
 
 class MemoryTracker 

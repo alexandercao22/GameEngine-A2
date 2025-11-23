@@ -7,10 +7,9 @@ void MemoryTracker::StartTracking(Allocator allocator, void* ptr, size_t size, s
 	allocation.ptr = ptr;
 	allocation.size = size;
 	allocation.tag = tag;
+	allocation.timestamp = std::chrono::high_resolution_clock::now();
 
-	// Calculate creation timestamp?
-
-	_allocations[ptr] = allocation;
+	_allocations.emplace(ptr, allocation);
 }
 
 void MemoryTracker::StopTracking(void* ptr)
