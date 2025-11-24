@@ -73,11 +73,15 @@ int main() {
 	void *ptr3 = buddyAllocator.Request(30);
 	buddyAllocator.PrintStates();
 
-	std::cout << "Start ptr: " << buddyAllocator.GetAddress() << std::endl;
-	std::cout << "Ptr1:      " << ptr1 << std::endl;
-	std::cout << "Ptr2:      " << ptr2 << std::endl;
-	std::cout << "Ptr3:      " << ptr3 << std::endl;
-	std::cout << "Diff:      " << (char *)ptr2 - ptr1 << std::endl;
+	buddyAllocator.Free(ptr3);
+	buddyAllocator.PrintStates();
+	buddyAllocator.Free(ptr1);
+	buddyAllocator.PrintStates();
+
+	ptr3 = buddyAllocator.Request(30);
+	buddyAllocator.PrintStates();
+	ptr1 = buddyAllocator.Request(129);
+	buddyAllocator.PrintStates();
 
 	return 0;
 }

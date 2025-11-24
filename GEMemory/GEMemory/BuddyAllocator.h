@@ -24,6 +24,7 @@ public:
 	void *Request(unsigned int size);
 	bool Free(void *element);
 
+	// TODO: GetStats(); // Return BuddyStats struct
 	void *GetAddress();
 	void PrintStates();
 };

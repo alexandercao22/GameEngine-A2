@@ -104,6 +104,48 @@ void *BuddyAllocator::Request(unsigned int size)
 
 bool BuddyAllocator::Free(void *element)
 {
+	char *elementPtr = (char *)element;
+	if (elementPtr < (char *)_memory || elementPtr > (char *)_buddies[_numBuddies].ptr) {
+		std::cerr << "BuddyAllocator::Free(): Element is not within this allocator" << std::endl;
+		return false;
+	}
+
+	for (int i = 0; i < _numBuddies; i) {
+		Buddy *current = &_buddies[i];
+		if (current->state == 2) { // Current is split
+			if ((char *)element >= (char *)_memory + current->size / 2) { // Element is in right hand buddy
+				i = i * 2 + 2;
+			}
+			else { // Element is in left hand buddy
+				i = i * 2 + 1;
+			}
+			continue;
+		}
+		else if (current->state == 1) { // Current is used
+			current->state = 0;
+			if (i == 0) {
+				return true;
+			}
+
+			if (i % 2 == 0) { // Current is right hand buddy
+				if (_buddies[i - 1].state == 0) {
+					_buddies[(i - 2) / 2].state = 0;
+				}
+			}
+			else { // Current is left hand buddy
+				if (_buddies[i + 1].state == 0) {
+					_buddies[(i - 1) / 2].state = 0;
+				}
+			}
+
+			return true;
+		}
+		else {
+			std::cout << "BuddyAllocator::Free(): All memeory is already free" << std::endl;
+			return false;
+		}
+	}
+
 	return false;
 }
 
