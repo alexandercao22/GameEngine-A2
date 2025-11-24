@@ -123,11 +123,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BuddyAllocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BuddyAllocator.h" />
     <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="StackAllocator.hpp" />
   </ItemGroup>
