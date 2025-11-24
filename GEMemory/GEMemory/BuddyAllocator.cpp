@@ -56,7 +56,7 @@ bool BuddyAllocator::Init(unsigned int size)
 
 void *BuddyAllocator::Request(unsigned int size)
 {
-		if (size > _buddies[0].size) {
+	if (size > _buddies[0].size) {
 		std::cerr << "BuddyAllocator::Request(): The requested amount is too large" << std::endl;
 		return nullptr;
 	}
@@ -77,6 +77,7 @@ void *BuddyAllocator::Request(unsigned int size)
 				continue;
 			}
 			else if (current->state == 2) {
+				parentIdx = i;
 				i = i * 2; // Skip to the next level
 				continue;
 			}
@@ -87,13 +88,17 @@ void *BuddyAllocator::Request(unsigned int size)
 		else { // Found a fitting buddy size
 			if (current->state == 0) {
 				current->state = 1;
+				std::cout << "Allocated index " << i << std::endl;
 				return current->ptr;
 			}
 			else if (current->state == 2) { // Current is split, move on to its buddy
 				continue;
 			}
-			else if (i == parentIdx + 1) {
-				return nullptr;
+			else if (i == parentIdx * 2 + 2) { // Both buddies of a parent are used, move on to parents buddy
+				i = parentIdx;
+				while (i % 2 == 0 && _buddies[i].state != 0) {
+					i = (i - 2) / 2;
+				}
 			}
 		}
 	}

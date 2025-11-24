@@ -66,21 +66,28 @@ int main() {
 
 	BuddyAllocator buddyAllocator;
 	buddyAllocator.Init(512);
-	void *ptr1 = buddyAllocator.Request(32);
-	buddyAllocator.PrintStates();
-	void *ptr2 = buddyAllocator.Request(64);
-	buddyAllocator.PrintStates();
-	void *ptr3 = buddyAllocator.Request(30);
-	buddyAllocator.PrintStates();
+	//void *ptr1 = buddyAllocator.Request(32);
+	//buddyAllocator.PrintStates();
+	//void *ptr2 = buddyAllocator.Request(64);
+	//buddyAllocator.PrintStates();
+	//void *ptr3 = buddyAllocator.Request(30);
+	//buddyAllocator.PrintStates();
 
-	buddyAllocator.Free(ptr3);
-	buddyAllocator.PrintStates();
-	buddyAllocator.Free(ptr1);
-	buddyAllocator.PrintStates();
+	//buddyAllocator.Free(ptr3);
+	//buddyAllocator.PrintStates();
+	//buddyAllocator.Free(ptr1);
+	//buddyAllocator.PrintStates();
 
-	ptr3 = buddyAllocator.Request(30);
-	buddyAllocator.PrintStates();
-	ptr1 = buddyAllocator.Request(129);
+	//ptr3 = buddyAllocator.Request(30);
+	//buddyAllocator.PrintStates();
+	//ptr1 = buddyAllocator.Request(129);
+	//buddyAllocator.PrintStates();
+
+	std::vector<void *> ptrs;
+	for (int i = 0; i < 16; i++) {
+		void *ptr = buddyAllocator.Request(32);
+		ptrs.push_back(ptr);
+	}
 	buddyAllocator.PrintStates();
 
 	return 0;
