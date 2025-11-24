@@ -13,7 +13,7 @@ private:
 	void *_memory = nullptr;
 	const int _maxDepthSize = 32;
 
-	Buddy *_buddies;
+	Buddy *_buddies = nullptr;
 	int _numBuddies = 0;
 
 public:

@@ -15,7 +15,7 @@ bool BuddyAllocator::Init(unsigned int size)
 	// Check if size is of base 2
 	float log2Size = std::log(size) / std::log(2);
 	if (ceilf(log2Size) != log2Size) {
-		std::cout << "BuddyAllocator::Init(): Failed to initalize" << std::endl;
+		std::cerr << "BuddyAllocator::Init(): Failed to initalize" << std::endl;
 		return false;
 	}
 
@@ -86,7 +86,6 @@ void *BuddyAllocator::Request(unsigned int size)
 		}
 		else { // Found a fitting buddy size
 			if (current->state == 0) {
-				std::cout << "Buddy index: " << i << std::endl;
 				current->state = 1;
 				return current->ptr;
 			}
@@ -141,7 +140,7 @@ bool BuddyAllocator::Free(void *element)
 			return true;
 		}
 		else {
-			std::cout << "BuddyAllocator::Free(): All memeory is already free" << std::endl;
+			std::cerr << "BuddyAllocator::Free(): All memeory is already free" << std::endl;
 			return false;
 		}
 	}
