@@ -4,17 +4,35 @@
 #include <unordered_map>
 #include <chrono>
 
+struct StackStats {
+	unsigned int capacity;
+	unsigned int usedMemory;
+};
+
+struct PoolStats {
+	unsigned int capacity;
+	unsigned int usedMemory;
+	int numBlocks;
+};
+
+struct BuddyStats {
+	unsigned int capacity;
+	unsigned int usedMemory;
+};
+
 enum class Allocator {
+	Stack,
 	Pool,
 	Buddy
 };
 
 struct Allocation {
 	Allocator allocator;
+	int allocatorId;
 	void* ptr;
 	size_t size;	// Size in bytes
 	std::string tag;	// Tag describing or categorizing the allocation
-	std::chrono::high_resolution_clock::time_point timestamp; // Creation timestamp
+	std::chrono::time_point<std::chrono::system_clock> timestamp; // Creation timestamp
 };
 
 class MemoryTracker 
@@ -22,6 +40,13 @@ class MemoryTracker
 private:
 	MemoryTracker() = default;
 	~MemoryTracker() = default;
+
+	// Stats of all tracked stack allocators (key = allocator id)
+	std::unordered_map<int, StackStats> _stackAllocators;
+	// Stats of all tracked pool allocators (key = allocator id)
+	std::unordered_map<int, PoolStats> _poolAllocators;
+	// Stats of all tracked buddy allocators (key = allocator id)
+	std::unordered_map<int, BuddyStats> _buddyAllocators;
 
 	// Keeps track of all tracked allocations using their pointers as keys for quick lookup
 	std::unordered_map<void*, Allocation> _allocations;
@@ -36,14 +61,33 @@ public:
 	MemoryTracker(const MemoryTracker&) = delete;
 	MemoryTracker& operator=(const MemoryTracker&) = delete;
 
+	// Starts tracking allocator if not already tracked, otherwise updates the allocator stats
+	void TrackAllocator(int id, const StackStats& stats);
+	// Starts tracking allocator if not already tracked, otherwise updates the allocator stats
+	void TrackAllocator(int id, const PoolStats& stats);
+	// Starts tracking allocator if not already tracked, otherwise updates the allocator stats
+	void TrackAllocator(int id, const BuddyStats& stats);
+
+	// Stops tracking the allocator with the given id
+	void RemoveAllocator(int id, Allocator allocator);
+
 	// Records a new allocation
-	void StartTracking(Allocator allocator, void* ptr, size_t size, std::string tag);
+	void StartTracking(Allocator allocator, int allocatorId, void* ptr, size_t size, std::string tag);
 	// Removes an allocation from the record
 	void StopTracking(void* ptr);
 
 	// UI functionality
 
 	// Debug functionality
-	bool GetAllocation(void* ptr, Allocation* allocation);
+
+	// Gets information about the allocation at the given pointer
+	bool GetAllocation(void* ptr, Allocation& allocation);
+
+	// Gets the stats of a tracked allocator with the given id
+	bool GetAllocatorStats(int id, StackStats& stats);
+	// Gets the stats of a tracked allocator with the given id
+	bool GetAllocatorStats(int id, PoolStats& stats);
+	// Gets the stats of a tracked allocator with the given id
+	bool GetAllocatorStats(int id, BuddyStats& stats);
 };
 
