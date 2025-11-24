@@ -1,5 +1,6 @@
 #include <iostream>
 #include "PoolAllocator.h"
+#include "StackAllocator.hpp"
 
 struct Enemy
 {
@@ -28,6 +29,29 @@ int main() {
 	std::cout << "Allocation tag: " << allocation.tag << std::endl;
 
 	firstPool.Free(firstPtr);
+	StackAllocator firstStack;
+	firstStack.Initialize(12);
+
+	Enemy* firstPtr = (Enemy*)firstStack.Request(sizeof(Enemy));
+	std::cout << "Första pointers adress: " << firstPtr << std::endl;
+
+	/*std::cout << "Första pointers adress: " << firstPool.GetAdress() << std::endl;
+	*/
+	//Enemy* firstPtr = (Enemy *)firstPool.Request();
+	firstPtr->health = 69.67f;
+	firstPtr->legs = 2;
+	firstPtr->tag = 'b';
+	
+	std::cout << "First value: " << firstPtr->health << std::endl;
+	std::cout << "First value: " << firstPtr->legs << std::endl;
+	std::cout << "First value: " << firstPtr->tag << std::endl;
+	std::cout << "Första pointers adress: " << firstPtr << std::endl;
+	/*
+	Enemy *secondPtr = (Enemy *)firstPool.Request();
+	firstPtr->health = 12.34f;
+	firstPtr->legs = 27;
+	firstPtr->tag = 'y';
+>>>>>>> Stashed changes
 
 	//std::cout << "First value: " << firstPtr->health << std::endl;
 	//std::cout << "First value: " << firstPtr->legs << std::endl;
@@ -60,6 +84,7 @@ int main() {
 
 	//void* sixthPtr = firstPool.Request();
 
+<<<<<<< Updated upstream
 	//std::cout << "Sjätte pointers adress: " << sixthPtr << std::endl;
 	//
 
@@ -68,7 +93,8 @@ int main() {
 	//std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
 
 	//std::cout << "SecondPool: " << secondPool.GetAdress(0) << std::endl;
-
+=======
+	std::cout << "SecondPool: " << secondPool.GetAdress() << std::endl;*/
 
 	return 0;
 }
