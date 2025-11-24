@@ -1,6 +1,6 @@
 #include <iostream>
 #include "PoolAllocator.h"
-#include "StackAllocator.hpp"
+#include "StackAllocator.h"
 #include "BuddyAllocator.h"
 
 #include <iomanip>

@@ -1,4 +1,4 @@
-#include "StackAllocator.hpp"
+#include "StackAllocator.h"
 
 bool StackAllocator::Initialize(int size) {
 

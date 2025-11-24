@@ -21,7 +21,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StackAllocator.cpp">
     <ClCompile Include="BuddyAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,7 +29,6 @@
     <ClInclude Include="PoolAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StackAllocator.hpp">
     <ClInclude Include="BuddyAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
