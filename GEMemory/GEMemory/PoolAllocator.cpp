@@ -3,6 +3,8 @@
 #include <malloc.h>
 #include <iostream>
 
+int PoolAllocator::_nextId = 0; // Set the initial id
+
 bool PoolAllocator::InitBlock(Block *block)
 {
 	if (_aligned) {
@@ -24,6 +26,7 @@ bool PoolAllocator::InitBlock(Block *block)
 		return false;
 	}
 
+	block->numUsed = 0;
 	block->head = 0;
 	for (int i = 0; i < _n; i++) {
 		block->nodes[i].free = true;
@@ -47,6 +50,20 @@ bool PoolAllocator::Expand()
 	return true;
 }
 
+PoolStats PoolAllocator::GetStats()
+{
+	PoolStats stats;
+	stats.capacity = _n * _size * _blocks.size();
+	stats.numBlocks = _blocks.size();
+	stats.usedMemory = 0;
+
+	for (Block& block : _blocks) {
+		stats.usedMemory += block.numUsed * _size;
+	}
+
+	return stats;
+}
+
 PoolAllocator::~PoolAllocator()
 {
 	for (Block& block : _blocks) {
@@ -60,6 +77,10 @@ PoolAllocator::~PoolAllocator()
 
 		free(block.nodes);
 		block.nodes = nullptr;
+	}
+
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().RemoveAllocator(_id, Allocator::Pool);
 	}
 }
 
@@ -79,6 +100,13 @@ bool PoolAllocator::Init(int n, int size, bool aligned)
 	}
 
 	_blocks.push_back(block);
+
+	_id = _nextId;
+	_nextId++;
+
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().TrackAllocator(_id, GetStats());
+	}
 
 	return true;
 }
@@ -117,12 +145,13 @@ void *PoolAllocator::Request(std::string tag)
 		block.nodes[index].free = false;
 		block.head = block.nodes[index].next;
 
+		block.numUsed += 1;
 
 		int memorySpace = index * _size;
 		void* ptr = static_cast<char*>(block.address) + memorySpace;
 
 		if (TRACK_MEMORY) {
-			MemoryTracker::Instance().StartTracking(Allocator::Pool, ptr, _size, tag);
+			MemoryTracker::Instance().StartTracking(Allocator::Pool, _id, ptr, _size, tag);
 		}
 
 		return ptr;
@@ -167,6 +196,8 @@ bool PoolAllocator::Free(void *ptr)
 		block.nodes[index].free = true;
 		block.nodes[index].next = block.head;
 		block.head = index;
+
+		block.numUsed -= 1;
 
 		if (TRACK_MEMORY) {
 			MemoryTracker::Instance().StopTracking(ptr);
