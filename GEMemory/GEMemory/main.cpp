@@ -90,5 +90,12 @@ int main() {
 	}
 	buddyAllocator.PrintStates();
 
+	for (int i = 0; i < 16; i++) {
+		if (i % 2 == 0) {
+			buddyAllocator.Free(ptrs[i]);
+		}
+	}
+	buddyAllocator.PrintStates();
+
 	return 0;
 }

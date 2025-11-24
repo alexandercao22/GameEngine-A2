@@ -117,7 +117,8 @@ bool BuddyAllocator::Free(void *element)
 	for (int i = 0; i < _numBuddies; i) {
 		Buddy *current = &_buddies[i];
 		if (current->state == 2) { // Current is split
-			if ((char *)element >= (char *)_memory + current->size / 2) { // Element is in right hand buddy
+			Buddy *temp = &_buddies[i * 2 + 2];
+			if ((char *)element >= (char *)temp->ptr) { // Element is in right hand buddy
 				i = i * 2 + 2;
 			}
 			else { // Element is in left hand buddy
@@ -126,6 +127,7 @@ bool BuddyAllocator::Free(void *element)
 			continue;
 		}
 		else if (current->state == 1) { // Current is used
+			std::cout << "Freed up " << i << std::endl;
 			current->state = 0;
 			if (i == 0) {
 				return true;
