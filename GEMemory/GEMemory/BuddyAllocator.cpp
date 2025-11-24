@@ -170,10 +170,21 @@ void BuddyAllocator::PrintStates()
 	}
 	std::cout << std::endl;
 	for (int i = 0; i < _numBuddies; i++) {
-		if (i >= 10) {
-			std::cout << " ";
+		int digits = 0;
+		std::string space = "";
+		if (i == 0) {
+			digits = 1;
 		}
-		std::cout << _buddies[i].state << " ";
+		else {
+			int temp = i;
+			while (temp > 0) {
+				temp /= 10;
+				digits++;
+				space += " ";
+			}
+		}
+
+		std::cout << space << _buddies[i].state;
 	}
-	std::cout << std::endl;
+	std::cout << std::endl << std::endl;
 }
