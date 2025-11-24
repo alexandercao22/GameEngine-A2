@@ -25,7 +25,10 @@ public:
 	bool Free(void *element);
 
 	// TODO: GetStats(); // Return BuddyStats struct
+
+	// Returns address of the allocators memory
 	void *GetAddress();
+	// Prints the state of every possible buddy
 	void PrintStates();
 };
 
