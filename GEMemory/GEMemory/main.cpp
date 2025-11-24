@@ -1,12 +1,30 @@
 #include <iostream>
 #include "PoolAllocator.h"
 
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
 struct Enemy
 {
 	float health = 100.0f;
 	int legs = 3;
 	char tag = 'a';
 };
+
+// Time to string formatting
+inline std::string FormatTimePoint(const std::chrono::system_clock::time_point& tp)
+{
+	std::time_t timeStamp = std::chrono::system_clock::to_time_t(tp);
+	std::tm localTime{};
+
+	localtime_s(&localTime, &timeStamp); // thread-safe Windows version
+
+	std::ostringstream oss;
+	oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
+	return oss.str();
+}
+
 
 int main() {
 	std::cout << "Hello World!" << std::endl;
@@ -16,7 +34,7 @@ int main() {
 	PoolAllocator secondPool;
 	secondPool.Init(5, 32, true);
 
-	std::cout << "Första pointers adress: " << firstPool.GetAdress(0) << std::endl;
+	std::cout << "Address to Pool 1: " << firstPool.GetAdress(0) << std::endl;
 
 	Enemy* firstPtr = (Enemy *)firstPool.Request("First enemy");
 	firstPtr->health = 69.67f;
@@ -24,8 +42,22 @@ int main() {
 	firstPtr->tag = 'b';
 
 	Allocation allocation;
-	MemoryTracker::Instance().GetAllocation(firstPtr, &allocation);
-	std::cout << "Allocation tag: " << allocation.tag << std::endl;
+	MemoryTracker::Instance().GetAllocation(firstPtr, allocation);
+	std::cout << "---- Allocation 1 ----" << std::endl;
+	//std::cout << "Allocator type: " << allocation.allocator << std::endl;
+	std::cout << std::endl << "Allocator id: " << allocation.allocatorId << std::endl;
+	std::cout << "Pointer: " << allocation.ptr << std::endl;
+	std::cout << "Size: " << allocation.size << std::endl;
+	std::cout << "Tag: " << allocation.tag << std::endl;
+	std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+
+	MemoryTracker::Instance().TrackAllocator(firstPool.GetId(), firstPool.GetStats());
+	PoolStats poolStats;
+	MemoryTracker::Instance().GetAllocatorStats(0, poolStats);
+	std::cout << std::endl << "---- Pool Allocator [id=0] ----" << std::endl;
+	std::cout << "Capacity: " << poolStats.capacity << std::endl;
+	std::cout << "Used Memory: " << poolStats.usedMemory << std::endl;
+	std::cout << "Number of Blocks: " << poolStats.numBlocks << std::endl;
 
 	firstPool.Free(firstPtr);
 
