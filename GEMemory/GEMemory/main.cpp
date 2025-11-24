@@ -9,49 +9,80 @@ struct Enemy
 	char tag = 'a';
 };
 
+struct MainCharacter {
+	float dmg;
+};
 int main() {
 	std::cout << "Hello World!" << std::endl;
 
-	PoolAllocator firstPool;
-	firstPool.Init(5, 9);
-	PoolAllocator secondPool;
-	secondPool.Init(5, 32, true);
+	//PoolAllocator firstPool;
+	//firstPool.Init(5, 9);
+	//PoolAllocator secondPool;
+	//secondPool.Init(5, 32, true);
 
-	std::cout << "Första pointers adress: " << firstPool.GetAdress(0) << std::endl;
+	//std::cout << "Första pointers adress: " << firstPool.GetAdress(0) << std::endl;
 
-	Enemy* firstPtr = (Enemy *)firstPool.Request("First enemy");
-	firstPtr->health = 69.67f;
-	firstPtr->legs = 2;
-	firstPtr->tag = 'b';
+	//Enemy* firstPtr = (Enemy *)firstPool.Request("First enemy");
+	//firstPtr->health = 69.67f;
+	//firstPtr->legs = 2;
+	//firstPtr->tag = 'b';
 
-	Allocation allocation;
-	MemoryTracker::Instance().GetAllocation(firstPtr, &allocation);
-	std::cout << "Allocation tag: " << allocation.tag << std::endl;
+	//Allocation allocation;
+	//MemoryTracker::Instance().GetAllocation(firstPtr, &allocation);
+	//std::cout << "Allocation tag: " << allocation.tag << std::endl;
 
-	firstPool.Free(firstPtr);
+	//firstPool.Free(firstPtr);
 	StackAllocator firstStack;
-	firstStack.Initialize(12);
+	firstStack.Initialize(24);
 
-	Enemy* firstPtr = (Enemy*)firstStack.Request(sizeof(Enemy));
-	std::cout << "Första pointers adress: " << firstPtr << std::endl;
+	Enemy* firstPtr2 = (Enemy*)firstStack.Request(sizeof(Enemy));
+	std::cout << "Första pointers adress: " << firstPtr2 << std::endl;
 
-	/*std::cout << "Första pointers adress: " << firstPool.GetAdress() << std::endl;
-	*/
-	//Enemy* firstPtr = (Enemy *)firstPool.Request();
-	firstPtr->health = 69.67f;
-	firstPtr->legs = 2;
-	firstPtr->tag = 'b';
 	
-	std::cout << "First value: " << firstPtr->health << std::endl;
-	std::cout << "First value: " << firstPtr->legs << std::endl;
-	std::cout << "First value: " << firstPtr->tag << std::endl;
-	std::cout << "Första pointers adress: " << firstPtr << std::endl;
+	firstPtr2->health = 69.67f;
+	firstPtr2->legs = 2;
+	firstPtr2->tag = 'b';
+	
+	std::cout << "First value: " << firstPtr2->health << std::endl;
+	std::cout << "First value: " << firstPtr2->legs << std::endl;
+	std::cout << "First value: " << firstPtr2->tag << std::endl;
+	std::cout << "Första pointers adress: " << firstPtr2 << std::endl;
+	
+	Enemy* secondPtr = (Enemy*)firstStack.Request(sizeof(Enemy));
+	std::cout << "Första pointers adress: " << firstPtr2 << std::endl;
+
+
+	secondPtr->health = 13.37f;
+	secondPtr->legs = 2;
+	secondPtr->tag = 'c';
+
+	std::cout << "Second value: " << secondPtr->health << std::endl;
+	std::cout << "Second value: " << secondPtr->legs << std::endl;
+	std::cout << "Second value: " << secondPtr->tag << std::endl;
+	std::cout << "Second pointers adress: " << secondPtr << std::endl;
+
+	firstStack.Free();
+
+
+	MainCharacter* thirdPtr = (MainCharacter*)firstStack.Request(sizeof(MainCharacter));
+	thirdPtr->dmg = 14.86;
+
+	std::cout << "Third value: " << thirdPtr->dmg << std::endl;
+	std::cout << "third pointers adress: " << thirdPtr << std::endl;
+
+
+	MainCharacter* fourthPtr = (MainCharacter*)firstStack.Request(sizeof(MainCharacter));
+	fourthPtr->dmg = 19.19;
+
+	std::cout << "Fourth value: " << fourthPtr->dmg << std::endl;
+	std::cout << "fourth pointers adress: " << fourthPtr << std::endl;
+
 	/*
 	Enemy *secondPtr = (Enemy *)firstPool.Request();
 	firstPtr->health = 12.34f;
 	firstPtr->legs = 27;
 	firstPtr->tag = 'y';
->>>>>>> Stashed changes
+
 
 	//std::cout << "First value: " << firstPtr->health << std::endl;
 	//std::cout << "First value: " << firstPtr->legs << std::endl;
