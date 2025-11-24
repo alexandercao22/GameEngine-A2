@@ -88,7 +88,6 @@ void *BuddyAllocator::Request(unsigned int size)
 		else { // Found a fitting buddy size
 			if (current->state == 0) {
 				current->state = 1;
-				std::cout << "Allocated index " << i << std::endl;
 				return current->ptr;
 			}
 			else if (current->state == 2) { // Current is split, move on to its buddy
@@ -127,7 +126,6 @@ bool BuddyAllocator::Free(void *element)
 			continue;
 		}
 		else if (current->state == 1) { // Current is used
-			std::cout << "Freed up " << i << std::endl;
 			current->state = 0;
 			if (i == 0) {
 				return true;
