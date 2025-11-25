@@ -264,14 +264,33 @@ void TestStack() {
 	std::cout << "fourthPtr address: " << fourthPtr << std::endl;
 
 	std::cout << std::endl;
+
+	// Memory tracking testing
+
+	MemoryTracker::Instance().TrackAllocator(firstStack.GetId(), firstStack.GetStats());
+	StackStats stats;
+	MemoryTracker::Instance().GetAllocatorStats(0, stats);
+	std::cout << std::endl << "---- StackAllocator [id=0] ----" << std::endl;
+	std::cout << "Capacity: " << stats.capacity << std::endl;
+	std::cout << "Used Memory: " << stats.usedMemory << std::endl;
+
+	Allocation allocation;
+	MemoryTracker::Instance().GetAllocation(firstPtr, allocation);
+	std::cout << "---- Stack Allocation ----" << std::endl;
+	//std::cout << "Allocator type: " << allocation.allocator << std::endl;
+	std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
+	std::cout << "Pointer: " << allocation.ptr << std::endl;
+	std::cout << "Size: " << allocation.size << std::endl;
+	std::cout << "Tag: " << allocation.tag << std::endl;
+	std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
 }
 
 int main() {
 	//TestPool();
 	//TestBuddy();
-	//TestStack();
+	TestStack();
 
-	TestPoolTime();
+	//TestPoolTime();
 
 	return 0;
 }

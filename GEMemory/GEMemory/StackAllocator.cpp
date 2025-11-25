@@ -1,30 +1,41 @@
 #include "StackAllocator.h"
 
+int StackAllocator::_nextId = 0;
+
 bool StackAllocator::Initialize(int size) {
 
 	_size = size;
 	_start = malloc(size);
 	_head = _start;
 	if (!_head) {
-		std::cerr << "StackAllocator failed to allocate block" << std::endl;
+		std::cerr << "StackAllocator::Initialize(): failed to allocate block" << std::endl;
 		return false;
 	}
-	std::cout << "head adress: " << _head << std::endl;
+
+	_id = _nextId;
+	_nextId++;
+
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().TrackAllocator(_id, GetStats());
+	}
 	return true;
 }
 
 StackAllocator::~StackAllocator() {
-	std::cout << "head adress: " << _head << std::endl;
 	free(_start);
+
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().RemoveAllocator(_id, Allocator::Stack);
+	}
 }
 
 // Copy a pointer to the start of the block and update head
-void* StackAllocator::Request(int size) {
+void* StackAllocator::Request(int size, std::string tag) {
 
 	void* block = _head;
 
 	if (static_cast<char*>(_head) + size > static_cast<char*>(_start) + _size) {
-		std::cerr << "Failed to allocate on the Stack: Not enough space available" << std::endl;
+		std::cerr << "StackAllocator::Request(): memory request exceeds stack capacity" << std::endl;
 		return nullptr;
 	}
 	_head = static_cast<char*>(_head) + size;
@@ -33,16 +44,31 @@ void* StackAllocator::Request(int size) {
 	_index++;
 	_blockSize[_index] = size;
 
-	int diff = static_cast<char*>(_head) - static_cast<char*>(_start);
-	std::cout << "diff: " << diff << std::endl;
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().StartTracking(Allocator::Stack, _id, block, size, tag);
+	}
+
 	return block;
 }
 
 bool StackAllocator::Free() {
 	int diff = _blockSize[_index];
-	std::cout << "free diff: " << diff << std::endl;
 	_head = static_cast<char*>(_head) - _blockSize[_index];
 	_index--;
 
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().StopTracking(_head);
+	}
+
 	return true;
+}
+
+StackStats StackAllocator::GetStats()
+{
+	StackStats stats;
+	stats.capacity = _size;
+	ptrdiff_t diff = static_cast<char*>(_head) - static_cast<char*>(_start);
+	stats.usedMemory = static_cast<unsigned int>(diff);
+
+	return stats;
 }
