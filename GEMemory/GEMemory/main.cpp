@@ -6,6 +6,11 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include <cstdlib>
+
+#include "raylib.h"
+#include "imgui.h"
+#include "rlImGui.h"
 
 struct Enemy {
 	float health = 100.0f;
@@ -204,6 +209,7 @@ void TestBuddy() {
 	}
 	buddyAllocator.PrintStates();
 
+	MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyAllocator.GetStats());
 
 	// Memory tracking testing
 
@@ -345,11 +351,72 @@ void TestStack() {
 }
 
 int main() {
-	TestPool();
+	//TestPool();
 	TestBuddy();
-	TestStack();
+	//TestStack();
 
 	//TestPoolTime();
+
+	std::srand(std::time({}));
+
+	const int width = 700;
+	const int height = 700;
+	InitWindow(width, height, "Game Engine Assignment 2");
+	SetTargetFPS(60);
+
+	rlImGuiSetup(true);
+
+	BuddyAllocator buddyAllocator;
+	buddyAllocator.Init(512);
+	std::vector<void *> buddyPtrs;
+
+	while (!WindowShouldClose()) {
+		BeginDrawing();
+		ClearBackground(BLACK);
+
+		rlImGuiBegin();
+
+		ImGui::Begin(" ", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+		ImGui::SetWindowSize(ImVec2(width, height));
+
+		static float percent = 0.0f;
+		ImGui::ProgressBar(percent, ImVec2(0.0f, 0.0f));
+		ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+		ImGui::Text("BuddyAllocator");
+
+		if (ImGui::IsKeyPressed(ImGuiKey_Q, false)) {
+			void *ptr = buddyAllocator.Request(30);
+			if (ptr) {
+				buddyPtrs.push_back(ptr);
+			}
+
+			BuddyStats buddyStats = buddyAllocator.GetStats();
+			MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyStats);
+
+			MemoryTracker::Instance().GetAllocatorStats(buddyAllocator.GetId(), buddyStats);
+			percent = (float)buddyStats.usedMemory / buddyStats.capacity;
+		}
+		if (ImGui::IsKeyPressed(ImGuiKey_E, false) && buddyPtrs.size() > 0) {
+			int randomIdx = std::rand() % buddyPtrs.size();
+			if (buddyAllocator.Free(buddyPtrs[randomIdx])) {
+				buddyPtrs.erase(buddyPtrs.begin() + randomIdx);
+
+				BuddyStats buddyStats = buddyAllocator.GetStats();
+				MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyStats);
+				MemoryTracker::Instance().GetAllocatorStats(buddyAllocator.GetId(), buddyStats);
+				percent = (float)buddyStats.usedMemory / buddyStats.capacity;
+			}
+		}
+
+		ImGui::End();
+
+		rlImGuiEnd();
+
+		EndDrawing();
+	}
+
+	CloseWindow();
 
 	return 0;
 }
