@@ -178,7 +178,11 @@ BuddyStats BuddyAllocator::GetStats()
 {
 	BuddyStats stats;
 	stats.capacity = _size;
-	// stats.usedMemory = ? FIX ALEX!
+	for (int i = 0; i < _numBuddies; i++) {
+		if (_buddies[i].state == 1) {
+			stats.usedMemory += _buddies[i].size;
+		}
+	}
 
 	return stats;
 }
