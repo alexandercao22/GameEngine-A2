@@ -7,6 +7,8 @@ bool StackAllocator::Initialize(int size) {
 	_size = size;
 	_start = malloc(size);
 	_head = _start;
+	int N = size / 4;
+	_blockSize = new int[N];
 	if (!_head) {
 		std::cerr << "StackAllocator::Initialize(): failed to allocate block" << std::endl;
 		return false;
@@ -27,6 +29,7 @@ StackAllocator::~StackAllocator() {
 	if (TRACK_MEMORY) {
 		MemoryTracker::Instance().RemoveAllocator(_id, Allocator::Stack);
 	}
+	delete _blockSize;
 }
 
 // Copy a pointer to the start of the block and update head
@@ -71,4 +74,11 @@ StackStats StackAllocator::GetStats()
 	stats.usedMemory = static_cast<unsigned int>(diff);
 
 	return stats;
+}
+
+bool StackAllocator::Reset() {
+	_head = _start;
+	_index = -1;
+
+	return true;
 }

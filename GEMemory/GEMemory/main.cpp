@@ -248,7 +248,21 @@ void TestStack() {
 	std::cout << "Testing StackAllocator" << std::endl;
 
 	StackAllocator firstStack;
-	firstStack.Initialize(24);
+	firstStack.Initialize(100000);
+	auto t0 = std::chrono::high_resolution_clock::now();
+	while (true) {
+		for (int i = 0; i < 1000; i++) {
+			int size = rand() % 100;
+			void* ptr = firstStack.Request(size);
+		}
+		firstStack.Reset();
+		auto t1 = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> duration = t1 - t0;
+		
+		if (duration.count() > 5) {
+			break;
+		}
+	}
 
 	StackAllocator secondStack;
 	secondStack.Initialize(600);

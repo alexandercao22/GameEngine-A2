@@ -12,8 +12,8 @@ private:
 
 	void* _start;
 	void* _head;
+	int* _blockSize;
 	int _size;
-	int _blockSize[16];
 	int _index = -1;
 
 public:
@@ -32,4 +32,5 @@ public:
 
 	// Returns the current stats for the allocator
 	StackStats GetStats();
+	bool Reset();
 };
