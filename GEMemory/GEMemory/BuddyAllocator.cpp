@@ -76,7 +76,7 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 		return nullptr;
 	}
 
-	if (_buddies[0].state == 1) {
+	if (_usedMemory == _size) {
 		std::cerr << "BuddyAllocator::Request(): There's no free memory left" << std::endl;
 		return nullptr;
 	}
@@ -103,6 +103,7 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 		else { // Found a fitting buddy size
 			if (current->state == 0) {
 				current->state = 1;
+				_usedMemory += current->size;
 				if (TRACK_MEMORY) {
 					MemoryTracker::Instance().StartTracking(Allocator::Buddy, _id, current->ptr, current->size, tag);
 				}
@@ -145,6 +146,7 @@ bool BuddyAllocator::Free(void *element)
 		}
 		else if (current->state == 1) { // Current is used
 			current->state = 0;
+			_usedMemory -= current->size;
 			if (TRACK_MEMORY) {
 				MemoryTracker::Instance().StopTracking(current->ptr);
 			}
@@ -178,11 +180,7 @@ BuddyStats BuddyAllocator::GetStats()
 {
 	BuddyStats stats;
 	stats.capacity = _size;
-	for (int i = 0; i < _numBuddies; i++) {
-		if (_buddies[i].state == 1) {
-			stats.usedMemory += _buddies[i].size;
-		}
-	}
+	stats.usedMemory = _usedMemory;
 
 	return stats;
 }

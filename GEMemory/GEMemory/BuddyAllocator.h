@@ -15,7 +15,8 @@ private:
 	int _id = -1; // Allocator id (-1 = uninitialized)
 	static int _nextId;
 
-	int _size = 0;
+	unsigned int _size = 0;
+	unsigned int _usedMemory = 0;
 	void *_memory = nullptr;
 	const int _maxDepthSize = 32;
 
