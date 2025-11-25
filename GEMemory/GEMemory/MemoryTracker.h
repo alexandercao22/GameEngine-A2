@@ -5,19 +5,19 @@
 #include <chrono>
 
 struct StackStats {
-	unsigned int capacity;
-	unsigned int usedMemory;
+	unsigned int capacity = 0;
+	unsigned int usedMemory = 0;
 };
 
 struct PoolStats {
-	unsigned int capacity;
-	unsigned int usedMemory;
-	int numBlocks;
+	unsigned int capacity = 0;
+	unsigned int usedMemory = 0;
+	int numBlocks = 0;
 };
 
 struct BuddyStats {
-	unsigned int capacity;
-	unsigned int usedMemory;
+	unsigned int capacity = 0;
+	unsigned int usedMemory = 0;
 };
 
 enum class Allocator {
@@ -30,7 +30,7 @@ struct Allocation {
 	Allocator allocator;
 	int allocatorId;
 	void* ptr;
-	size_t size;	// Size in bytes
+	size_t size = 0;	// Size in bytes
 	std::string tag;	// Tag describing or categorizing the allocation
 	std::chrono::time_point<std::chrono::system_clock> timestamp; // Creation timestamp
 };
