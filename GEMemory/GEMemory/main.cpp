@@ -44,22 +44,36 @@ void TestPool() {
 	firstPtr->legs = 27;
 	firstPtr->tag = 'y';
 	Allocation allocation;
-	MemoryTracker::Instance().GetAllocation(firstPtr, allocation);
-	std::cout << "---- Allocation 1 ----" << std::endl;
-	//std::cout << "Allocator type: " << allocation.allocator << std::endl;
-	std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
-	std::cout << "Pointer: " << allocation.ptr << std::endl;
-	std::cout << "Size: " << allocation.size << std::endl;
-	std::cout << "Tag: " << allocation.tag << std::endl;
-	std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
 
-	MemoryTracker::Instance().TrackAllocator(firstPool.GetId(), firstPool.GetStats());
-	PoolStats poolStats;
-	MemoryTracker::Instance().GetAllocatorStats(0, poolStats);
-	std::cout << std::endl << "---- Pool Allocator [id=0] ----" << std::endl;
-	std::cout << "Capacity: " << poolStats.capacity << std::endl;
-	std::cout << "Used Memory: " << poolStats.usedMemory << std::endl;
-	std::cout << "Number of Blocks: " << poolStats.numBlocks << std::endl;
+	// Memory tracking testing
+
+	std::unordered_map<int, PoolStats> stackAllocators = MemoryTracker::Instance().GetPoolAllocators();
+	std::cout << "---- Tracked Pool Allocators ----" << std::endl;
+	for (auto& pair : stackAllocators) {
+		int allocatorId = pair.first;
+		PoolStats allocator = pair.second;
+		std::cout << std::endl << "Allocator id: " << allocatorId << std::endl;
+		std::cout << "Capacity: " << allocator.capacity << std::endl;
+		std::cout << "Used Memory: " << allocator.usedMemory << std::endl;
+		std::cout << "Number Of Blocks: " << allocator.numBlocks << std::endl;
+	}
+
+	std::cout << std::endl;
+
+	// Print all allocations on any stack
+	std::unordered_map<void*, Allocation> allocations = MemoryTracker::Instance().GetAllocations();
+	std::cout << "---- Tracked Pool Allocations ----" << std::endl;
+	for (auto& pair : allocations) {
+		Allocation allocation = pair.second;
+		if (allocation.allocator == Allocator::Pool) {
+			std::cout << std::endl;
+			std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
+			std::cout << "Pointer: " << allocation.ptr << std::endl;
+			std::cout << "Size: " << allocation.size << std::endl;
+			std::cout << "Tag: " << allocation.tag << std::endl;
+			std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+		}
+	}
 
 	//std::cout << "First value: " << firstPtr->health << std::endl;
 	//std::cout << "First value: " << firstPtr->legs << std::endl;
@@ -193,22 +207,32 @@ void TestBuddy() {
 
 	// Memory tracking testing
 
-	Allocation allocation;
-	MemoryTracker::Instance().GetAllocation(ptrs.at(10), allocation);
-	std::cout << "---- Buddy Allocation ----" << std::endl;
-	//std::cout << "Allocator type: " << allocation.allocator << std::endl;
-	std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
-	std::cout << "Pointer: " << allocation.ptr << std::endl;
-	std::cout << "Size: " << allocation.size << std::endl;
-	std::cout << "Tag: " << allocation.tag << std::endl;
-	std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+	std::unordered_map<int, BuddyStats> buddyAllocators = MemoryTracker::Instance().GetBuddyAllocators();
+	std::cout << "---- Tracked Buddy Allocators ----" << std::endl;
+	for (auto& pair : buddyAllocators) {
+		int allocatorId = pair.first;
+		BuddyStats allocator = pair.second;
+		std::cout << std::endl << "Allocator id: " << allocatorId << std::endl;
+		std::cout << "Capacity: " << allocator.capacity << std::endl;
+		std::cout << "Used Memory: " << allocator.usedMemory << std::endl;
+	}
 
-	MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyAllocator.GetStats());
-	BuddyStats stats;
-	MemoryTracker::Instance().GetAllocatorStats(0, stats);
-	std::cout << std::endl << "---- BuddyAllocator [id=0] ----" << std::endl;
-	std::cout << "Capacity: " << stats.capacity << std::endl;
-	std::cout << "Used Memory: " << stats.usedMemory << std::endl;
+	std::cout << std::endl;
+
+	// Print all allocations in in any buddy allocator
+	std::unordered_map<void*, Allocation> allocations = MemoryTracker::Instance().GetAllocations();
+	std::cout << "---- Tracked Buddy Allocations ----" << std::endl;
+	for (auto& pair : allocations) {
+		Allocation allocation = pair.second;
+		if (allocation.allocator == Allocator::Buddy) {
+			std::cout << std::endl;
+			std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
+			std::cout << "Pointer: " << allocation.ptr << std::endl;
+			std::cout << "Size: " << allocation.size << std::endl;
+			std::cout << "Tag: " << allocation.tag << std::endl;
+			std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+		}
+	}
 
 	for (int i = 0; i < 16; i++) {
 		if (i % 2 == 0) {
@@ -225,6 +249,9 @@ void TestStack() {
 
 	StackAllocator firstStack;
 	firstStack.Initialize(24);
+
+	StackAllocator secondStack;
+	secondStack.Initialize(600);
 
 	Enemy *firstPtr = (Enemy *)firstStack.Request(sizeof(Enemy));
 	std::cout << "firstPtr address: " << firstPtr << std::endl;
@@ -267,27 +294,45 @@ void TestStack() {
 
 	// Memory tracking testing
 
-	MemoryTracker::Instance().TrackAllocator(firstStack.GetId(), firstStack.GetStats());
-	StackStats stats;
-	MemoryTracker::Instance().GetAllocatorStats(0, stats);
-	std::cout << std::endl << "---- StackAllocator [id=0] ----" << std::endl;
-	std::cout << "Capacity: " << stats.capacity << std::endl;
-	std::cout << "Used Memory: " << stats.usedMemory << std::endl;
+	//MemoryTracker::Instance().TrackAllocator(firstStack.GetId(), firstStack.GetStats());
+	//StackStats stats;
+	//MemoryTracker::Instance().GetAllocatorStats(0, stats);
+	//std::cout << std::endl << "---- StackAllocator [id=0] ----" << std::endl;
+	//std::cout << "Capacity: " << stats.capacity << std::endl;
+	//std::cout << "Used Memory: " << stats.usedMemory << std::endl;
 
-	Allocation allocation;
-	MemoryTracker::Instance().GetAllocation(firstPtr, allocation);
-	std::cout << "---- Stack Allocation ----" << std::endl;
-	//std::cout << "Allocator type: " << allocation.allocator << std::endl;
-	std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
-	std::cout << "Pointer: " << allocation.ptr << std::endl;
-	std::cout << "Size: " << allocation.size << std::endl;
-	std::cout << "Tag: " << allocation.tag << std::endl;
-	std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+	std::unordered_map<int, StackStats> stackAllocators = MemoryTracker::Instance().GetStackAllocators();
+	std::cout << "---- Tracked Stack Allocators ----" << std::endl;
+	for (auto& pair : stackAllocators) {
+		int allocatorId = pair.first;
+		StackStats allocator = pair.second;
+		std::cout << std::endl << "Allocator id: " << allocatorId << std::endl;
+		std::cout << "Capacity: " << allocator.capacity << std::endl;
+		std::cout << "Used Memory: " << allocator.usedMemory << std::endl;
+	}
+
+	std::cout << std::endl;
+
+	// Print all allocations on any stack
+	std::unordered_map<void*, Allocation> allocations = MemoryTracker::Instance().GetAllocations();
+	std::cout << "---- Tracked Stack Allocations ----" << std::endl;
+	for (auto& pair : allocations) {
+		Allocation allocation = pair.second;
+		if (allocation.allocator == Allocator::Stack) {
+			std::cout << std::endl;
+			std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
+			std::cout << "Pointer: " << allocation.ptr << std::endl;
+			std::cout << "Size: " << allocation.size << std::endl;
+			std::cout << "Tag: " << allocation.tag << std::endl;
+			std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+		}
+	}
+
 }
 
 int main() {
-	//TestPool();
-	//TestBuddy();
+	TestPool();
+	TestBuddy();
 	TestStack();
 
 	//TestPoolTime();
