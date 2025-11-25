@@ -105,6 +105,62 @@ void TestPool() {
 	std::cout << std::endl;
 }
 
+void TestPoolTime() {
+	int nrOfObjects = 50000;
+
+	/* Running 2 loops, one uses new and delete each iteration the other uses poolallocation
+	* Both loops are nestled which means for each outer iteration we can reuse the space from
+	* PoolAllocation
+	*/
+
+	auto t0 = std::chrono::high_resolution_clock::now();
+
+	std::vector<Enemy *> enemies;
+
+
+	for (int i = 0; i < nrOfObjects; i++) {
+		for (int k = 0; k < 10; k++) {
+			Enemy *enemy = new Enemy;
+			enemies.push_back(enemy);
+		}
+
+		for (auto enemy : enemies) {
+			delete enemy;
+		}
+		enemies.clear();
+	}
+	auto t1 = std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<double> duration = t1 - t0;
+	std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
+
+	t0 = std::chrono::high_resolution_clock::now();
+
+	PoolAllocator PoolAlloc;
+	PoolAlloc.Init(20, sizeof(Enemy));
+
+	std::vector<Enemy *> enemies2;
+
+
+	for (int i = 0; i < nrOfObjects; i++) {
+		for (int k = 0; k < 10; k++) {
+			Enemy *enemy = (Enemy *)PoolAlloc.Request();
+			enemies2.push_back(enemy);
+
+		}
+		for (auto enemy : enemies2) {
+			PoolAlloc.Free(enemy);
+		}
+		enemies2.clear();
+	}
+
+
+	t1 = std::chrono::high_resolution_clock::now();
+
+	duration = t1 - t0;
+	std::cout << "OS PoolAllocator Execution time: " << duration.count() << std::endl;
+}
+
 void TestBuddy() {
 	std::cout << "Testing BuddyAllocator" << std::endl;
 
@@ -211,9 +267,11 @@ void TestStack() {
 }
 
 int main() {
-	TestPool();
-	TestBuddy();
-	TestStack();
+	//TestPool();
+	//TestBuddy();
+	//TestStack();
+
+	TestPoolTime();
 
 	return 0;
 }
