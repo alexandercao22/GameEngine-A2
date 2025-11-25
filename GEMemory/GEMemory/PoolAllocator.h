@@ -1,9 +1,8 @@
 #pragma once
 #include "MemoryTracker.h"
+#include "Settings.h"
 #include <vector>
 #include <string>
-
-#define TRACK_MEMORY true
 
 struct Node {
 	bool free;	// True if part of the list, otherwise false
@@ -48,7 +47,7 @@ public:
 	bool Init(int n, int size, bool aligned = false);
 	// Get the first free slot
 	void *Request(std::string tag = "No tag");
-	bool Free(void *element);
+	bool Free(void *ptr);
 
 	// Memory tracking
 

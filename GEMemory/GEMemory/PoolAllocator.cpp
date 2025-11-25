@@ -1,5 +1,5 @@
 #include "PoolAllocator.h"
-
+#include "Settings.h"
 #include <malloc.h>
 #include <iostream>
 
