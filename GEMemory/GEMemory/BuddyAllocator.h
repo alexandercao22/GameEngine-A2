@@ -1,5 +1,8 @@
 #pragma once
 
+#include "MemoryTracker.h"
+#include "Settings.h"
+
 struct Buddy {
 	unsigned int size = 0;
 	int state = 0; // 0 = Free, 1 - Used, 2 - Split
@@ -9,6 +12,9 @@ struct Buddy {
 class BuddyAllocator
 {
 private:
+	int _id = -1; // Allocator id (-1 = uninitialized)
+	static int _nextId;
+
 	int _size = 0;
 	void *_memory = nullptr;
 	const int _maxDepthSize = 32;
@@ -20,11 +26,16 @@ public:
 	BuddyAllocator() = default;
 	~BuddyAllocator();
 
+	int GetId() {
+		return _id;
+	}
+
 	bool Init(unsigned int size = 1024);
-	void *Request(unsigned int size);
+	void *Request(unsigned int size, std::string tag = "No tag");
 	bool Free(void *element);
 
-	// TODO: GetStats(); // Return BuddyStats struct
+	// Returns the current stats for the allocator
+	BuddyStats GetStats();
 
 	// Returns address of the allocators memory
 	void *GetAddress();

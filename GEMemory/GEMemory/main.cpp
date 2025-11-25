@@ -134,6 +134,26 @@ void TestBuddy() {
 	}
 	buddyAllocator.PrintStates();
 
+
+	// Memory tracking testing
+
+	Allocation allocation;
+	MemoryTracker::Instance().GetAllocation(ptrs.at(10), allocation);
+	std::cout << "---- Buddy Allocation ----" << std::endl;
+	//std::cout << "Allocator type: " << allocation.allocator << std::endl;
+	std::cout << "Allocator id: " << allocation.allocatorId << std::endl;
+	std::cout << "Pointer: " << allocation.ptr << std::endl;
+	std::cout << "Size: " << allocation.size << std::endl;
+	std::cout << "Tag: " << allocation.tag << std::endl;
+	std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
+
+	MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyAllocator.GetStats());
+	BuddyStats stats;
+	MemoryTracker::Instance().GetAllocatorStats(0, stats);
+	std::cout << std::endl << "---- BuddyAllocator [id=0] ----" << std::endl;
+	std::cout << "Capacity: " << stats.capacity << std::endl;
+	std::cout << "Used Memory: " << stats.usedMemory << std::endl;
+
 	for (int i = 0; i < 16; i++) {
 		if (i % 2 == 0) {
 			buddyAllocator.Free(ptrs[i]);

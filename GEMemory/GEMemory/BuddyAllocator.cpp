@@ -4,10 +4,16 @@
 #include <cmath>
 #include <malloc.h>
 
+int BuddyAllocator::_nextId = 0; // Set the initial id
+
 BuddyAllocator::~BuddyAllocator()
 {
 	free(_memory);
 	free(_buddies);
+
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().RemoveAllocator(_id, Allocator::Buddy);
+	}
 }
 
 bool BuddyAllocator::Init(unsigned int size)
@@ -51,10 +57,19 @@ bool BuddyAllocator::Init(unsigned int size)
 		}
 	}
 
+	_size = size;
+
+	_id = _nextId;
+	_nextId++;
+
+	if (TRACK_MEMORY) {
+		MemoryTracker::Instance().TrackAllocator(_id, GetStats());
+	}
+
 	return true;
 }
 
-void *BuddyAllocator::Request(unsigned int size)
+void *BuddyAllocator::Request(unsigned int size, std::string tag)
 {
 	if (size > _buddies[0].size) {
 		std::cerr << "BuddyAllocator::Request(): The requested amount is too large" << std::endl;
@@ -88,6 +103,9 @@ void *BuddyAllocator::Request(unsigned int size)
 		else { // Found a fitting buddy size
 			if (current->state == 0) {
 				current->state = 1;
+				if (TRACK_MEMORY) {
+					MemoryTracker::Instance().StartTracking(Allocator::Buddy, _id, current->ptr, current->size, tag);
+				}
 				return current->ptr;
 			}
 			else if (current->state == 2) { // Current is split, move on to its buddy
@@ -127,6 +145,9 @@ bool BuddyAllocator::Free(void *element)
 		}
 		else if (current->state == 1) { // Current is used
 			current->state = 0;
+			if (TRACK_MEMORY) {
+				MemoryTracker::Instance().StopTracking(current->ptr);
+			}
 			if (i == 0) {
 				return true;
 			}
@@ -151,6 +172,15 @@ bool BuddyAllocator::Free(void *element)
 	}
 
 	return false;
+}
+
+BuddyStats BuddyAllocator::GetStats()
+{
+	BuddyStats stats;
+	stats.capacity = _size;
+	// stats.usedMemory = ? FIX ALEX!
+
+	return stats;
 }
 
 void *BuddyAllocator::GetAddress()
