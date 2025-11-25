@@ -7,8 +7,8 @@ class StackAllocator {
 private:
 	void* _start;
 	void* _head;
+	int* _blockSize;
 	int _size;
-	int _blockSize[16];
 	int _index = -1;
 
 public:
@@ -20,4 +20,5 @@ public:
 
 	void* Request(int size);
 	bool Free();
+	bool Reset();
 };

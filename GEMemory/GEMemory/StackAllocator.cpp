@@ -5,17 +5,18 @@ bool StackAllocator::Initialize(int size) {
 	_size = size;
 	_start = malloc(size);
 	_head = _start;
+	int N = size / 4;
+	_blockSize = new int[N];
 	if (!_head) {
 		std::cerr << "StackAllocator failed to allocate block" << std::endl;
 		return false;
 	}
-	std::cout << "head adress: " << _head << std::endl;
 	return true;
 }
 
 StackAllocator::~StackAllocator() {
-	std::cout << "head adress: " << _head << std::endl;
 	free(_start);
+	delete _blockSize;
 }
 
 // Copy a pointer to the start of the block and update head
@@ -33,16 +34,20 @@ void* StackAllocator::Request(int size) {
 	_index++;
 	_blockSize[_index] = size;
 
-	int diff = static_cast<char*>(_head) - static_cast<char*>(_start);
-	std::cout << "diff: " << diff << std::endl;
 	return block;
 }
 
 bool StackAllocator::Free() {
-	int diff = _blockSize[_index];
-	std::cout << "free diff: " << diff << std::endl;
+
 	_head = static_cast<char*>(_head) - _blockSize[_index];
 	_index--;
+
+	return true;
+}
+
+bool StackAllocator::Reset() {
+	_head = _start;
+	_index = -1;
 
 	return true;
 }
