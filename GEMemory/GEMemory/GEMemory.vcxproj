@@ -133,6 +133,7 @@
     <ClInclude Include="BuddyAllocator.h" />
     <ClInclude Include="MemoryTracker.h" />
     <ClInclude Include="PoolAllocator.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="StackAllocator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
