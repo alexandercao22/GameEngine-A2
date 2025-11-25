@@ -31,6 +31,11 @@ bool MemoryTracker::GetAllocation(void* ptr, Allocation& allocation)
 	return true;
 }
 
+std::unordered_map<void*, Allocation> MemoryTracker::GetAllocations()
+{
+	return _allocations;
+}
+
 bool MemoryTracker::GetAllocatorStats(int id, StackStats& stats)
 {
 	auto element = _stackAllocators.find(id);
@@ -42,6 +47,11 @@ bool MemoryTracker::GetAllocatorStats(int id, StackStats& stats)
 		stats = element->second;
 		return true;
 	}
+}
+
+std::unordered_map<int, StackStats> MemoryTracker::GetStackAllocators()
+{
+	return _stackAllocators;
 }
 
 bool MemoryTracker::GetAllocatorStats(int id, PoolStats& stats)
@@ -57,6 +67,11 @@ bool MemoryTracker::GetAllocatorStats(int id, PoolStats& stats)
 	}
 }
 
+std::unordered_map<int, PoolStats> MemoryTracker::GetPoolAllocators()
+{
+	return _poolAllocators;
+}
+
 bool MemoryTracker::GetAllocatorStats(int id, BuddyStats& stats)
 {
 	auto element = _buddyAllocators.find(id);
@@ -68,6 +83,11 @@ bool MemoryTracker::GetAllocatorStats(int id, BuddyStats& stats)
 		stats = element->second;
 		return true;
 	}
+}
+
+std::unordered_map<int, BuddyStats> MemoryTracker::GetBuddyAllocators()
+{
+	return _buddyAllocators;
 }
 
 void MemoryTracker::TrackAllocator(int id, const StackStats& stats)

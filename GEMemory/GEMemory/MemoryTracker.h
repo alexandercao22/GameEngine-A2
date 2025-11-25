@@ -76,18 +76,27 @@ public:
 	// Removes an allocation from the record
 	void StopTracking(void* ptr);
 
-	// UI functionality
-
-	// Debug functionality
-
 	// Gets information about the allocation at the given pointer
 	bool GetAllocation(void* ptr, Allocation& allocation);
+	// Gets all currently tracked allocations
+	std::unordered_map<void*, Allocation> GetAllocations();
 
 	// Gets the stats of a tracked allocator with the given id
 	bool GetAllocatorStats(int id, StackStats& stats);
+	// Gets the stats of all trackeded stack allocators
+	std::unordered_map<int, StackStats> GetStackAllocators();
+
 	// Gets the stats of a tracked allocator with the given id
 	bool GetAllocatorStats(int id, PoolStats& stats);
+	// Gets the stats of all tracked pool allocators
+	std::unordered_map<int, PoolStats> GetPoolAllocators();
+
 	// Gets the stats of a tracked allocator with the given id
 	bool GetAllocatorStats(int id, BuddyStats& stats);
+	// Gets the stats of all tracked buddy allocators
+	std::unordered_map<int, BuddyStats> GetBuddyAllocators();
+
+
+	// UI Functions
 };
 
