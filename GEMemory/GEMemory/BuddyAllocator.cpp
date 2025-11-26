@@ -71,6 +71,9 @@ bool BuddyAllocator::Init(unsigned int size)
 
 void *BuddyAllocator::Request(unsigned int size, std::string tag)
 {
+#ifdef DEBUG
+	std::cout << "Request(" << size << ")" << std::endl;
+#endif
 	if (size > _buddies[0].size) {
 		std::cerr << "BuddyAllocator::Request(): The requested amount is too large" << std::endl;
 		return nullptr;
@@ -107,6 +110,11 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 				if (TRACK_MEMORY) {
 					MemoryTracker::Instance().StartTracking(Allocator::Buddy, _id, current->ptr, current->size, tag);
 				}
+#ifdef DEBUG
+				std::cout << "Index(" << i << ")" << std::endl;
+				std::cout << "Used(" << _usedMemory << "/" << _size << ")" << std::endl;
+				PrintStates();
+#endif
 				return current->ptr;
 			}
 			else if (current->state == 2 && i % 2 == 1) { // Current is split, move on to its buddy
@@ -154,6 +162,11 @@ bool BuddyAllocator::Free(void *element)
 			if (TRACK_MEMORY) {
 				MemoryTracker::Instance().StopTracking(current->ptr);
 			}
+#ifdef DEBUG
+			std::cout << "Free(" << i << ")" << std::endl;
+			std::cout << "Used(" << _usedMemory << "/" << _size << ")" << std::endl;
+			PrintStates();
+#endif
 			if (i == 0) {
 				return true;
 			}
