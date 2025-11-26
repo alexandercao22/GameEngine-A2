@@ -245,9 +245,24 @@ void TestBuddy() {
 			buddyAllocator.Free(ptrs[i]);
 		}
 	}
-	buddyAllocator.PrintStates();
 
 	std::cout << std::endl;
+}
+
+void TestBuddy2() {
+	BuddyAllocator buddy;
+	buddy.Init(512);
+	std::vector<void *> ptrs;
+
+	for (int i = 0; i < 7; i++) {
+		void *ptr = buddy.Request(64);
+		ptrs.push_back(ptr);
+	}
+
+	buddy.Free(ptrs[4]);
+
+	void *ptr = buddy.Request(128);
+	ptrs.push_back(ptr);
 }
 
 void TestStack() {
@@ -352,12 +367,12 @@ void TestStack() {
 
 int main() {
 	//TestPool();
-	TestBuddy();
+	TestBuddy2();
 	//TestStack();
 
 	//TestPoolTime();
 
-	std::srand(std::time({}));
+	/*std::srand(std::time({}));
 
 	const int width = 700;
 	const int height = 700;
@@ -458,7 +473,7 @@ int main() {
 		EndDrawing();
 	}
 
-	CloseWindow();
+	CloseWindow();*/
 
 	return 0;
 }
