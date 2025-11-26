@@ -372,7 +372,7 @@ int main() {
 
 	//TestPoolTime();
 
-	/*std::srand(std::time({}));
+	std::srand(std::time({}));
 
 	const int width = 700;
 	const int height = 700;
@@ -389,6 +389,7 @@ int main() {
 	int poolNum = 5;
 	poolAllocator.Init(poolNum, 12);
 	std::vector<void*> poolPtrs;
+
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -419,7 +420,7 @@ int main() {
 
 		}
 
-		if (ImGui::IsKeyPressed(ImGuiKey_Q, false)) {
+		if (ImGui::IsKeyPressed(ImGuiKey_Q, false)) { // Request from BuddyAllocator
 			void *ptr = buddyAllocator.Request(30);
 			if (ptr) {
 				buddyPtrs.push_back(ptr);
@@ -431,7 +432,7 @@ int main() {
 			MemoryTracker::Instance().GetAllocatorStats(buddyAllocator.GetId(), buddyStats);
 			percent = (float)buddyStats.usedMemory / buddyStats.capacity;
 		}
-		if (ImGui::IsKeyPressed(ImGuiKey_E, false) && buddyPtrs.size() > 0) {
+		if (ImGui::IsKeyPressed(ImGuiKey_E, false) && buddyPtrs.size() > 0) { // Free from BuddyAllocator
 			int randomIdx = std::rand() % buddyPtrs.size();
 			if (buddyAllocator.Free(buddyPtrs[randomIdx])) {
 				buddyPtrs.erase(buddyPtrs.begin() + randomIdx);
@@ -442,7 +443,8 @@ int main() {
 				percent = (float)buddyStats.usedMemory / buddyStats.capacity;
 			}
 		}
-		if (ImGui::IsKeyPressed(ImGuiKey_R, false)) {
+
+		if (ImGui::IsKeyPressed(ImGuiKey_R, false)) { // Request from PoolAllocator
 			void* ptr = poolAllocator.Request();
 			if (ptr) {
 				poolPtrs.push_back(ptr);
@@ -450,19 +452,14 @@ int main() {
 
 			PoolStats poolStats = poolAllocator.GetStats();
 			MemoryTracker::Instance().TrackAllocator(poolAllocator.GetId(), poolStats);
-
-			MemoryTracker::Instance().GetAllocatorStats(poolAllocator.GetId(), poolStats);
-			//percent = (float)buddyStats.usedMemory / buddyStats.capacity;
 		}
-		if (ImGui::IsKeyPressed(ImGuiKey_T, false) && poolPtrs.size() > 0) {
+		if (ImGui::IsKeyPressed(ImGuiKey_T, false) && poolPtrs.size() > 0) { // Free from PoolAllocator
 			int randomIdx = std::rand() % poolPtrs.size();
 			if (poolAllocator.Free(poolPtrs[randomIdx])) {
 				poolPtrs.erase(poolPtrs.begin() + randomIdx);
 
 				PoolStats poolStats = poolAllocator.GetStats();
 				MemoryTracker::Instance().TrackAllocator(poolAllocator.GetId(), poolStats);
-				MemoryTracker::Instance().GetAllocatorStats(poolAllocator.GetId(), poolStats);
-				//percent = (float)buddyStats.usedMemory / buddyStats.capacity;
 			}
 		}
 
@@ -473,7 +470,7 @@ int main() {
 		EndDrawing();
 	}
 
-	CloseWindow();*/
+	CloseWindow();
 
 	return 0;
 }
