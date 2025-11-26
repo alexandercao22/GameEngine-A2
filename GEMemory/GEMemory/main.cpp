@@ -370,6 +370,10 @@ int main() {
 	buddyAllocator.Init(512);
 	std::vector<void *> buddyPtrs;
 
+	PoolAllocator poolAllocator;
+	int poolNum = 5;
+	poolAllocator.Init(poolNum, 12);
+	std::vector<void*> poolPtrs;
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -384,6 +388,21 @@ int main() {
 		ImGui::ProgressBar(percent, ImVec2(0.0f, 0.0f));
 		ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 		ImGui::Text("BuddyAllocator");
+
+		ImGui::Spacing();
+
+		ImDrawList* draw = ImGui::GetWindowDrawList();
+		ImVec2 p = ImGui::GetCursorScreenPos();
+
+		float blockWidth = 40.0f;
+		float blockHeight = 20.0f;
+		for (int i = 0; i < poolNum;i++) {
+			bool used = poolAllocator.GetUsed(i);
+			ImU32 col = used ? IM_COL32(255,0,0,255) : IM_COL32(0,255,0,255);
+			
+			draw->AddRectFilled(ImVec2(p.x + i * blockWidth, p.y), ImVec2(p.x + (i + 1) * blockWidth - 1, p.y + blockHeight), col);
+
+		}
 
 		if (ImGui::IsKeyPressed(ImGuiKey_Q, false)) {
 			void *ptr = buddyAllocator.Request(30);
@@ -406,6 +425,29 @@ int main() {
 				MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyStats);
 				MemoryTracker::Instance().GetAllocatorStats(buddyAllocator.GetId(), buddyStats);
 				percent = (float)buddyStats.usedMemory / buddyStats.capacity;
+			}
+		}
+		if (ImGui::IsKeyPressed(ImGuiKey_R, false)) {
+			void* ptr = poolAllocator.Request();
+			if (ptr) {
+				poolPtrs.push_back(ptr);
+			}
+
+			PoolStats poolStats = poolAllocator.GetStats();
+			MemoryTracker::Instance().TrackAllocator(poolAllocator.GetId(), poolStats);
+
+			MemoryTracker::Instance().GetAllocatorStats(poolAllocator.GetId(), poolStats);
+			//percent = (float)buddyStats.usedMemory / buddyStats.capacity;
+		}
+		if (ImGui::IsKeyPressed(ImGuiKey_T, false) && poolPtrs.size() > 0) {
+			int randomIdx = std::rand() % poolPtrs.size();
+			if (poolAllocator.Free(poolPtrs[randomIdx])) {
+				poolPtrs.erase(poolPtrs.begin() + randomIdx);
+
+				PoolStats poolStats = poolAllocator.GetStats();
+				MemoryTracker::Instance().TrackAllocator(poolAllocator.GetId(), poolStats);
+				MemoryTracker::Instance().GetAllocatorStats(poolAllocator.GetId(), poolStats);
+				//percent = (float)buddyStats.usedMemory / buddyStats.capacity;
 			}
 		}
 

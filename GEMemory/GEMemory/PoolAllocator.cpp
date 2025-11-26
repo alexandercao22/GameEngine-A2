@@ -211,6 +211,12 @@ bool PoolAllocator::Free(void *ptr)
 	return false;
 }
 
+bool PoolAllocator::GetUsed(int index) {
+	int i = index % _n;
+	int k = index / _n;
+	return _blocks[k].nodes[i].free;
+}
+
 // Debug
 void* PoolAllocator::GetAdress(size_t index) {
 	return _blocks.at(index).address;

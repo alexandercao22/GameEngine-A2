@@ -54,6 +54,8 @@ public:
 	// Returns the current stats for the allocator
 	PoolStats GetStats();
 
+	bool GetUsed(int index);
+
 	// Debug functionality
 
 	// Returns the address of the block at the given index
