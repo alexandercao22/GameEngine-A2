@@ -76,7 +76,7 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 		return nullptr;
 	}
 
-	if (_usedMemory == _size) {
+	if (size > _size - _usedMemory) {
 		std::cerr << "BuddyAllocator::Request(): There's no free memory left" << std::endl;
 		return nullptr;
 	}
