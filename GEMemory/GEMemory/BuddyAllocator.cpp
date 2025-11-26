@@ -109,10 +109,14 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 				}
 				return current->ptr;
 			}
-			else if (current->state == 2) { // Current is split, move on to its buddy
+			else if (current->state == 2 && i % 2 == 1) { // Current is split, move on to its buddy
 				continue;
 			}
-			else if (i == parentIdx * 2 + 2) { // Both buddies of a parent are used, move on to parents buddy
+			else if (i % 2 == 0) { // Both buddies of a parent are used, move on to parents buddy
+				if (_buddies[i + 1].size < size) { // If traversed to the last buddy in the desired level
+					std::cerr << "BuddyAllocator::Request(): Could not find a free slot for the specified size" << std::endl;
+					return nullptr;
+				}
 				i = parentIdx;
 				while (i % 2 == 0 && _buddies[i].state != 0) {
 					i = (i - 2) / 2;
