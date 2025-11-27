@@ -128,6 +128,7 @@
     <ClCompile Include="MemoryTracker.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
+    <ClCompile Include="TestCases.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuddyAllocator.h" />
@@ -135,6 +136,7 @@
     <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="StackAllocator.h" />
+    <ClInclude Include="TestCases.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

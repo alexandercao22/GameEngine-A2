@@ -2,16 +2,17 @@
 #include "PoolAllocator.h"
 #include "StackAllocator.h"
 #include "BuddyAllocator.h"
+#include "TestCases.h"
 
 #include <iomanip>
 #include <ctime>
 #include <sstream>
 
-struct Enemy {
-	float health = 100.0f;
-	int legs = 3;
-	char tag = 'a';
-};
+//struct Enemy {
+//	float health = 100.0f;
+//	int legs = 3;
+//	char tag = 'a';
+//};
 
 struct MainCharacter {
 	float dmg;
@@ -120,104 +121,165 @@ void TestPool() {
 }
 
 void TestPoolTime() {
-	int startObjects = 10000;
+	int startObjects = 2000;
+	std::cout << "Testing PoolAllocation " << std::endl;
+	auto t0 = std::chrono::high_resolution_clock::now();
 
+	PoolAllocator pool;
+	pool.Init(startObjects, sizeof(Enemy));
+	std::vector<Enemy*> live;
+
+	const int FRAMES = 100'000;
+
+	for (int f = 0; f < FRAMES; f++) {
+
+		// Allocate some random objects
+		int allocCount = rand() % 1000;
+		for (int i = 0; i < allocCount; i++) {
+			Enemy* e = (Enemy*)pool.Request();
+			live.push_back(e);
+		}
+
+		// Free some random objects
+		int freeCount = rand() % 1000;
+		for (int i = 0; i < freeCount && !live.empty(); i++) {
+			int index = rand() % live.size();
+			pool.Free(live[index]);
+			live.erase(live.begin() + index);
+		}
+	}
+	auto t1 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> duration = t1 - t0;
+
+	std::cout << "OS PoolAllocation Execution time: " << duration.count() << std::endl;
+	
+	std::cout << "Testing OS new/delete " << std::endl;
+	t0 = std::chrono::high_resolution_clock::now();
+
+	std::vector<Enemy*> live2;
+
+	
+	for (int f = 0; f < FRAMES; f++) {
+
+		// Allocate some random objects
+		int allocCount = rand() % 1000;
+		for (int i = 0; i < allocCount; i++) {
+			Enemy* e = new Enemy;
+			live2.push_back(e);
+		}
+
+		// Free some random objects
+		int freeCount = rand() % 1000;
+		for (int i = 0; i < freeCount && !live2.empty(); i++) {
+			int index = rand() % live2.size();
+			delete live2[index];
+			live2.erase(live2.begin() + index);
+		}
+	}
+	t1 = std::chrono::high_resolution_clock::now();
+	duration = t1 - t0;
+
+	std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
+
+	
+	
+	
 	/* Running 2 loops, one uses new and delete each iteration the other uses poolallocation
 	* Both loops are nestled which means for each outer iteration we can reuse the space from
 	* PoolAllocation
 	*/
 
-	auto t0 = std::chrono::high_resolution_clock::now();
+	//auto t0 = std::chrono::high_resolution_clock::now();
 
-	std::vector<Enemy *> enemies;
+	//std::vector<Enemy *> enemies;
 
-	for (int i = 0; i < startObjects; i++) {
-		Enemy* enemy = new Enemy;
-		enemies.push_back(enemy);
-	}
+	//for (int i = 0; i < startObjects; i++) {
+	//	Enemy* enemy = new Enemy;
+	//	enemies.push_back(enemy);
+	//}
 
-	while (!enemies.empty()) {
-		int insert = rand() % 10;
+	//while (!enemies.empty()) {
+	//	int insert = rand() % 10;
 
-		if (insert % 10 == 0) {
-			Enemy* enemy = new Enemy;
-			enemies.push_back(enemy);
-		}
-		else {
-			int max = enemies.size();
-			int index = rand() % max;
-			
-			delete enemies[index];
-			enemies.erase(enemies.begin() + index);
-		}
-
-		/*if (enemies.size() % 100 == 0) {
-			std::cout << "iterating" << std::endl;
-
-		}*/
-
-	}
-
-	auto t1 = std::chrono::high_resolution_clock::now();
-
-	std::chrono::duration<double> duration = t1 - t0;
-	std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
-
-	//for (int i = 0; i < nrOfObjects; i++) {
-	//	for (int k = 0; k < 10; k++) {
-	//		Enemy *enemy = new Enemy;
+	//	if (insert % 10 == 0) {
+	//		Enemy* enemy = new Enemy;
 	//		enemies.push_back(enemy);
 	//	}
-
-	//	for (auto enemy : enemies) {
-	//		delete enemy;
+	//	else {
+	//		int max = enemies.size();
+	//		int index = rand() % max;
+	//		
+	//		delete enemies[index];
+	//		enemies.erase(enemies.begin() + index);
 	//	}
-	//	enemies.clear();
+
+	//	/*if (enemies.size() % 100 == 0) {
+	//		std::cout << "iterating" << std::endl;
+
+	//	}*/
+
 	//}
-	t0 = std::chrono::high_resolution_clock::now();
 
-	PoolAllocator PoolAlloc;
-	PoolAlloc.Init(startObjects, sizeof(Enemy));
+	//auto t1 = std::chrono::high_resolution_clock::now();
 
-	std::vector<Enemy *> enemies2;
+	//std::chrono::duration<double> duration = t1 - t0;
+	//std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
 
+	////for (int i = 0; i < nrOfObjects; i++) {
+	////	for (int k = 0; k < 10; k++) {
+	////		Enemy *enemy = new Enemy;
+	////		enemies.push_back(enemy);
+	////	}
 
-	for (int i = 0; i < startObjects; i++) {
-			Enemy *enemy = (Enemy *)PoolAlloc.Request();
-			enemies2.push_back(enemy);
+	////	for (auto enemy : enemies) {
+	////		delete enemy;
+	////	}
+	////	enemies.clear();
+	////}
+	//t0 = std::chrono::high_resolution_clock::now();
 
-	}
-	while (!enemies2.empty()) {
-		int insert = rand() % 10;
+	//PoolAllocator PoolAlloc;
+	//PoolAlloc.Init(startObjects, sizeof(Enemy));
 
-		if (insert % 10 == 0) {
-			Enemy* enemy = (Enemy*)PoolAlloc.Request();
-			enemies2.push_back(enemy);
-		}
-		else {
-			int max = enemies.size();
-			int index = rand() % max;
-
-			
-			PoolAlloc.Free(enemies2.at(index));
-
-			enemies.erase(enemies.begin() + index);
-		}
-
-		/*if (enemies.size() % 100 == 0) {
-			std::cout << "iterating" << std::endl;
-
-		}*/
-
-	}
-
-	
+	//std::vector<Enemy *> enemies2;
 
 
-	t1 = std::chrono::high_resolution_clock::now();
+	//for (int i = 0; i < startObjects; i++) {
+	//		Enemy *enemy = (Enemy *)PoolAlloc.Request();
+	//		enemies2.push_back(enemy);
 
-	duration = t1 - t0;
-	std::cout << "OS PoolAllocator Execution time: " << duration.count() << std::endl;
+	//}
+	//while (!enemies2.empty()) {
+	//	int insert = rand() % 10;
+
+	//	if (insert % 10 == 0) {
+	//		Enemy* enemy = (Enemy*)PoolAlloc.Request();
+	//		enemies2.push_back(enemy);
+	//	}
+	//	else {
+	//		int max = enemies2.size();
+	//		int index = rand() % max;
+
+	//		
+	//		PoolAlloc.Free(enemies2.at(index));
+
+	//		enemies2.erase(enemies2.begin() + index);
+	//	}
+
+	//	/*if (enemies.size() % 100 == 0) {
+	//		std::cout << "iterating" << std::endl;
+
+	//	}*/
+
+	//}
+
+	//
+
+
+	//t1 = std::chrono::high_resolution_clock::now();
+
+	//duration = t1 - t0;
+	//std::cout << "OS PoolAllocator Execution time: " << duration.count() << std::endl;
 }
 
 void TestBuddy() {
@@ -444,7 +506,9 @@ int main() {
 	//TestBuddy();
 	TestStack();
 
-	TestPoolTime();
+	//TestPoolTime();
+
+	PoolVSOS();
 
 	return 0;
 }

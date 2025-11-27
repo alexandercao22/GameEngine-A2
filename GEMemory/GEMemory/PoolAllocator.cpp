@@ -137,9 +137,9 @@ void *PoolAllocator::Request(std::string tag)
 		}
 
 		// Double check if the space is free or not
-		if (block.nodes[index].free == false) {
+		/*if (block.nodes[index].free == false) {
 			index = block.nodes[index].next;
-		}
+		}*/
 
 		// Set requested block as taken and update head node
 		block.nodes[index].free = false;
