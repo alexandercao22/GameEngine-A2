@@ -71,6 +71,9 @@
     <ClInclude Include="Interface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Objects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -3,6 +3,8 @@
 #include "StackAllocator.h"
 #include "BuddyAllocator.h"
 
+#include "Objects.h"
+
 #include <iomanip>
 #include <ctime>
 #include <sstream>
@@ -11,16 +13,6 @@
 #include "raylib.h"
 #include "imgui.h"
 #include "rlImGui.h"
-
-struct Enemy {
-	float health = 100.0f;
-	int legs = 3;
-	char tag = 'a';
-};
-
-struct MainCharacter {
-	float dmg;
-};
 
 // Time to string formatting
 inline std::string FormatTimePoint(const std::chrono::system_clock::time_point& tp) {

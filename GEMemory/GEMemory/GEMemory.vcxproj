@@ -141,6 +141,7 @@
     <ClInclude Include="BuddyAllocator.h" />
     <ClInclude Include="Interface.h" />
     <ClInclude Include="MemoryTracker.h" />
+    <ClInclude Include="Objects.h" />
     <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="StackAllocator.h" />
