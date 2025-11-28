@@ -130,6 +130,7 @@
     <ClCompile Include="imgui_draw.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="Interface.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryTracker.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
@@ -138,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuddyAllocator.h" />
+    <ClInclude Include="Interface.h" />
     <ClInclude Include="MemoryTracker.h" />
     <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="Settings.h" />
