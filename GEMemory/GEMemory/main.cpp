@@ -8,11 +8,6 @@
 #include <ctime>
 #include <sstream>
 
-//struct Enemy {
-//	float health = 100.0f;
-//	int legs = 3;
-//	char tag = 'a';
-//};
 
 struct MainCharacter {
 	float dmg;
@@ -75,47 +70,6 @@ void TestPool() {
 			std::cout << "Timestamp: " << FormatTimePoint(allocation.timestamp) << std::endl;
 		}
 	}
-
-	//std::cout << "First value: " << firstPtr->health << std::endl;
-	//std::cout << "First value: " << firstPtr->legs << std::endl;
-	//std::cout << "First value: " << firstPtr->tag << std::endl;
-	//std::cout << "F�rsta pointers adress: " << firstPtr << std::endl;
-
-	//Enemy *secondPtr = (Enemy *)firstPool.Request();
-	//firstPtr->health = 12.34f;
-	//firstPtr->legs = 27;
-	//firstPtr->tag = 'y';
-
-	//std::cout << "Second value: " << firstPtr->health << std::endl;
-	//std::cout << "Second value: " << firstPtr->legs << std::endl;
-	//std::cout << "Second value: " << firstPtr->tag << std::endl;
-	//std::cout << "Andra pointers adress: " << secondPtr << std::endl;
-
-	//void* thirdPtr = firstPool.Request();
-
-	//std::cout << "Tredje pointers adress: " << thirdPtr << std::endl;
-
-	//void* fourthPtr = firstPool.Request();
-
-	//std::cout << "Fj�rde pointers adress: " << fourthPtr << std::endl;
-
-	//void* fifthPtr = firstPool.Request();
-
-	//std::cout << "Femte pointers adress: " << fifthPtr << std::endl;
-
-	//firstPool.Free(secondPtr);
-
-	//void* sixthPtr = firstPool.Request();
-
-	//std::cout << "Sj�tte pointers adress: " << sixthPtr << std::endl;
-	//
-
-	//void* seventhPtr = firstPool.Request();
-	//
-	//std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
-
-	//std::cout << "SecondPool: " << secondPool.GetAdress(0) << std::endl;
-	//std::cout << "SecondPool: " << secondPool.GetAdress() << std::endl;
 
 	std::cout << std::endl;
 }
@@ -181,105 +135,6 @@ void TestPoolTime() {
 
 	std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
 
-	
-	
-	
-	/* Running 2 loops, one uses new and delete each iteration the other uses poolallocation
-	* Both loops are nestled which means for each outer iteration we can reuse the space from
-	* PoolAllocation
-	*/
-
-	//auto t0 = std::chrono::high_resolution_clock::now();
-
-	//std::vector<Enemy *> enemies;
-
-	//for (int i = 0; i < startObjects; i++) {
-	//	Enemy* enemy = new Enemy;
-	//	enemies.push_back(enemy);
-	//}
-
-	//while (!enemies.empty()) {
-	//	int insert = rand() % 10;
-
-	//	if (insert % 10 == 0) {
-	//		Enemy* enemy = new Enemy;
-	//		enemies.push_back(enemy);
-	//	}
-	//	else {
-	//		int max = enemies.size();
-	//		int index = rand() % max;
-	//		
-	//		delete enemies[index];
-	//		enemies.erase(enemies.begin() + index);
-	//	}
-
-	//	/*if (enemies.size() % 100 == 0) {
-	//		std::cout << "iterating" << std::endl;
-
-	//	}*/
-
-	//}
-
-	//auto t1 = std::chrono::high_resolution_clock::now();
-
-	//std::chrono::duration<double> duration = t1 - t0;
-	//std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
-
-	////for (int i = 0; i < nrOfObjects; i++) {
-	////	for (int k = 0; k < 10; k++) {
-	////		Enemy *enemy = new Enemy;
-	////		enemies.push_back(enemy);
-	////	}
-
-	////	for (auto enemy : enemies) {
-	////		delete enemy;
-	////	}
-	////	enemies.clear();
-	////}
-	//t0 = std::chrono::high_resolution_clock::now();
-
-	//PoolAllocator PoolAlloc;
-	//PoolAlloc.Init(startObjects, sizeof(Enemy));
-
-	//std::vector<Enemy *> enemies2;
-
-
-	//for (int i = 0; i < startObjects; i++) {
-	//		Enemy *enemy = (Enemy *)PoolAlloc.Request();
-	//		enemies2.push_back(enemy);
-
-	//}
-	//while (!enemies2.empty()) {
-	//	int insert = rand() % 10;
-
-	//	if (insert % 10 == 0) {
-	//		Enemy* enemy = (Enemy*)PoolAlloc.Request();
-	//		enemies2.push_back(enemy);
-	//	}
-	//	else {
-	//		int max = enemies2.size();
-	//		int index = rand() % max;
-
-	//		
-	//		PoolAlloc.Free(enemies2.at(index));
-
-	//		enemies2.erase(enemies2.begin() + index);
-	//	}
-
-	//	/*if (enemies.size() % 100 == 0) {
-	//		std::cout << "iterating" << std::endl;
-
-	//	}*/
-
-	//}
-
-	//
-
-
-	//t1 = std::chrono::high_resolution_clock::now();
-
-	//duration = t1 - t0;
-	//std::cout << "OS PoolAllocator Execution time: " << duration.count() << std::endl;
 }
 
 void TestBuddy() {
@@ -287,22 +142,7 @@ void TestBuddy() {
 
 	BuddyAllocator buddyAllocator;
 	buddyAllocator.Init(512);
-	//void *ptr1 = buddyAllocator.Request(32);
-	//buddyAllocator.PrintStates();
-	//void *ptr2 = buddyAllocator.Request(64);
-	//buddyAllocator.PrintStates();
-	//void *ptr3 = buddyAllocator.Request(30);
-	//buddyAllocator.PrintStates();
 
-	//buddyAllocator.Free(ptr3);
-	//buddyAllocator.PrintStates();
-	//buddyAllocator.Free(ptr1);
-	//buddyAllocator.PrintStates();
-
-	//ptr3 = buddyAllocator.Request(30);
-	//buddyAllocator.PrintStates();
-	//ptr1 = buddyAllocator.Request(129);
-	//buddyAllocator.PrintStates();
 
 	std::vector<void *> ptrs;
 	for (int i = 0; i < 16; i++) {
@@ -411,55 +251,12 @@ void TestStack() {
 			enemy.tag = 'a';
 		}
 
-	/*	if (i % 100 == 0)
-			std::cout << "iteraions" << std::endl;
-	*/
 	}
 	t1 = std::chrono::high_resolution_clock::now();
 
 	duration = t1 - t0;
 
 	std::cout << "OS Stack exection time: " << duration.count() << std::endl;
-
-	//StackAllocator secondStack;
-	//secondStack.Initialize(600);
-
-	//Enemy *firstPtr = (Enemy *)firstStack.Request(sizeof(Enemy));
-	//std::cout << "firstPtr address: " << firstPtr << std::endl;
-
-	//firstPtr->health = 69.67f;
-	//firstPtr->legs = 2;
-	//firstPtr->tag = 'b';
-
-	//std::cout << "First value: " << firstPtr->health << std::endl;
-	//std::cout << "First value: " << firstPtr->legs << std::endl;
-	//std::cout << "First value: " << firstPtr->tag << std::endl;
-	//std::cout << "firstPtr address: " << firstPtr << std::endl;
-
-	//Enemy *secondPtr = (Enemy *)firstStack.Request(sizeof(Enemy));
-	//secondPtr->health = 13.37f;
-	//secondPtr->legs = 2;
-	//secondPtr->tag = 'c';
-
-	//std::cout << "Second value: " << secondPtr->health << std::endl;
-	//std::cout << "Second value: " << secondPtr->legs << std::endl;
-	//std::cout << "Second value: " << secondPtr->tag << std::endl;
-	//std::cout << "secondPtr address: " << secondPtr << std::endl;
-
-	//firstStack.Free();
-
-	//MainCharacter *thirdPtr = (MainCharacter *)firstStack.Request(sizeof(MainCharacter));
-	//thirdPtr->dmg = 14.86;
-
-	//std::cout << "Third value: " << thirdPtr->dmg << std::endl;
-	//std::cout << "thirdPtr address: " << thirdPtr << std::endl;
-
-
-	//MainCharacter *fourthPtr = (MainCharacter *)firstStack.Request(sizeof(MainCharacter));
-	//fourthPtr->dmg = 19.19;
-
-	//std::cout << "Fourth value: " << fourthPtr->dmg << std::endl;
-	//std::cout << "fourthPtr address: " << fourthPtr << std::endl;
 
 	std::cout << std::endl;
 
@@ -504,11 +301,11 @@ void TestStack() {
 int main() {
 	//TestPool();
 	//TestBuddy();
-	TestStack();
+	//TestStack();
 
 	//TestPoolTime();
 
-	PoolVSOS();
-
+	//PoolVSOS();
+	testAll();
 	return 0;
 }

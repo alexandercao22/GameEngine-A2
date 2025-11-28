@@ -9,3 +9,4 @@ struct Enemy {
 
 void PoolVSOS();
 void StackVsOS();
+void testAll();
