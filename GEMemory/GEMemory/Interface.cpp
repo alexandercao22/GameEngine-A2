@@ -101,6 +101,76 @@ void Interface::ShowPoolInfo()
 
 void Interface::ShowBuddyInfo()
 {
+	std::unordered_map<int, BuddyStats> buddyAllocators = MemoryTracker::Instance().GetBuddyAllocators();
+	std::vector<std::string> buddyIds;
+	for (auto &pair : buddyAllocators) {
+		buddyIds.push_back(std::to_string(pair.first));
+	}
+	static int currentBuddy = 0;
+	ImGui::Combo("BuddyAllocators", &currentBuddy, [](void *data, int idx, const char **out_text)
+		{
+			auto &vec = *static_cast<std::vector<std::string>*>(data);
+			if (idx < 0 || idx >= vec.size()) return false;
+			*out_text = vec[idx].c_str();
+			return true;
+		}, &buddyIds, buddyIds.size());
+
+	static float buddyPercent = 0.0f;
+
+	ImGui::NewLine();
+	ImGui::Text("Allocation to current allocator");
+
+	// Allocate
+	static int size = 0;
+	ImGui::InputInt("Size", &size);
+
+	const int nBuddies = buddyAllocators.size();
+	if (ImGui::Button("Allocate") && nBuddies > 0) {
+		for (int i = 0; i < nBuddies; i++) {
+			BuddyContainer *currBuddy = &_buddies[i];
+
+			if (currentBuddy == currBuddy->buddy->GetId()) {
+				void *ptr = currBuddy->buddy->Request(size);
+				if (ptr) {
+					currBuddy->ptrs.push_back(ptr);
+				}
+
+				// Update tracker
+				BuddyStats buddyStats = currBuddy->buddy->GetStats();
+				MemoryTracker::Instance().TrackAllocator(currBuddy->buddy->GetId(), buddyStats);
+				buddyPercent = (float)buddyStats.usedMemory / buddyStats.capacity;
+
+				break;
+			}
+		}
+	}
+
+	// Free
+	// There needs to be at least 1 active buddy allocator
+	if (ImGui::Button("Free random") && nBuddies > 0) {
+		for (int i = 0; i < nBuddies; i++) {
+			BuddyContainer *currBuddy = &_buddies[i];
+
+			if (currentBuddy == currBuddy->buddy->GetId() && currBuddy->ptrs.size() > 0) {
+				int randIdx = std::rand() % currBuddy->ptrs.size();
+				if (currBuddy->buddy->Free(currBuddy->ptrs[randIdx])) {
+					currBuddy->ptrs.erase(currBuddy->ptrs.begin() + randIdx);
+				}
+
+				// Update tracker
+				BuddyStats buddyStats = currBuddy->buddy->GetStats();
+				MemoryTracker::Instance().TrackAllocator(currBuddy->buddy->GetId(), buddyStats);
+				buddyPercent = (float)buddyStats.usedMemory / buddyStats.capacity;
+
+				break;
+			}
+		}
+	}
+
+	// Info
+	ImGui::ProgressBar(buddyPercent, ImVec2(0.0f, 0.0f));
+	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+	ImGui::Text("Used");
 }
 
 void Interface::ShowStackInfo()
@@ -173,6 +243,16 @@ void Interface::Update()
 				_pools.push_back(pCon);
 			}
 		}
+		else if (currentType == 1) { // Buddy
+			BuddyContainer bCon;
+			bCon.buddy = new BuddyAllocator;
+			if (bCon.buddy->Init(size)) {
+				_buddies.push_back(bCon);
+			}
+			else {
+				ImGui::Text("Error");
+			}
+		}
 	}
 
 	// Allocator info
@@ -184,6 +264,9 @@ void Interface::Update()
 
 	if (chosenType == 0) { // Pool
 		ShowPoolInfo();
+	}
+	else if (chosenType == 1) { // Buddy
+		ShowBuddyInfo();
 	}
 
 	ImGui::End();
