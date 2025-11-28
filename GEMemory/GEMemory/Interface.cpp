@@ -175,6 +175,76 @@ void Interface::ShowBuddyInfo()
 
 void Interface::ShowStackInfo()
 {
+	std::unordered_map<int, StackStats> stackAllocators = MemoryTracker::Instance().GetStackAllocators();
+	std::vector<std::string> stackIds;
+	for (auto &pair : stackAllocators) {
+		stackIds.push_back(std::to_string(pair.first));
+	}
+	static int currentStack = 0;
+	ImGui::Combo("StackAllocators", &currentStack, [](void *data, int idx, const char **out_text)
+		{
+			auto &vec = *static_cast<std::vector<std::string>*>(data);
+			if (idx < 0 || idx >= vec.size()) return false;
+			*out_text = vec[idx].c_str();
+			return true;
+		}, &stackIds, stackIds.size());
+
+	static float stackPercent= 0.0f;
+
+	ImGui::NewLine();
+	ImGui::Text("Allocation to current allocator");
+
+	// Allocate
+	static int size = 0;
+	ImGui::InputInt("Size", &size);
+
+	const int nBuddies = stackAllocators.size();
+	if (ImGui::Button("Allocate") && nBuddies > 0) {
+		for (int i = 0; i < nBuddies; i++) {
+			StackContainer *currStack = &_stacks[i];
+
+			if (currentStack == currStack->stack->GetId()) {
+				void *ptr = currStack->stack->Request(size);
+				if (ptr) {
+					currStack->ptrs.push_back(ptr);
+				}
+
+				// Update tracker
+				StackStats stackStats = currStack->stack->GetStats();
+				MemoryTracker::Instance().TrackAllocator(currStack->stack->GetId(), stackStats);
+				stackPercent = (float)stackStats.usedMemory / stackStats.capacity;
+
+				break;
+			}
+		}
+	}
+
+	// Free
+	// There needs to be at least 1 active stack allocator
+	if (ImGui::Button("Free") && nBuddies > 0) {
+		for (int i = 0; i < nBuddies; i++) {
+			StackContainer *currStack = &_stacks[i];
+
+			if (currentStack == currStack->stack->GetId() && currStack->ptrs.size() > 0) {
+				int randIdx = std::rand() % currStack->ptrs.size();
+				if (currStack->stack->Free()) {
+					currStack->ptrs.erase(currStack->ptrs.begin() + randIdx);
+				}
+
+				// Update tracker
+				StackStats stackStats = currStack->stack->GetStats();
+				MemoryTracker::Instance().TrackAllocator(currStack->stack->GetId(), stackStats);
+				stackPercent = (float)stackStats.usedMemory / stackStats.capacity;
+
+				break;
+			}
+		}
+	}
+
+	// Info
+	ImGui::ProgressBar(stackPercent, ImVec2(0.0f, 0.0f));
+	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+	ImGui::Text("Used");
 }
 
 Interface::Interface()
@@ -253,6 +323,13 @@ void Interface::Update()
 				ImGui::Text("Error");
 			}
 		}
+		else if (currentType == 2) { // Stack
+			StackContainer sCon;
+			sCon.stack = new StackAllocator;
+			if (sCon.stack->Initialize(size)) {
+				_stacks.push_back(sCon);
+			}
+		}
 	}
 
 	// Allocator info
@@ -267,6 +344,9 @@ void Interface::Update()
 	}
 	else if (chosenType == 1) { // Buddy
 		ShowBuddyInfo();
+	}
+	else if (chosenType == 2) { // Stack
+		ShowStackInfo();
 	}
 
 	ImGui::End();
