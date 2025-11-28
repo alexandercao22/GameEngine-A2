@@ -3,6 +3,7 @@
 #include "StackAllocator.h"
 #include "BuddyAllocator.h"
 
+#include "Interface.h"
 #include "Objects.h"
 
 #include <iomanip>
@@ -359,107 +360,15 @@ void TestStack() {
 
 int main() {
 	//TestPool();
-	TestBuddy2();
+	//TestBuddy2();
 	//TestStack();
 
 	//TestPoolTime();
 
-	std::srand(std::time({}));
-
-	const int width = 700;
-	const int height = 700;
-	InitWindow(width, height, "Game Engine Assignment 2");
-	SetTargetFPS(60);
-
-	rlImGuiSetup(true);
-
-	BuddyAllocator buddyAllocator;
-	buddyAllocator.Init(512);
-	std::vector<void *> buddyPtrs;
-
-	PoolAllocator poolAllocator;
-	int poolNum = 5;
-	poolAllocator.Init(poolNum, 12);
-	std::vector<void*> poolPtrs;
+	Interface interface;
 
 	while (!WindowShouldClose()) {
-		BeginDrawing();
-		ClearBackground(BLACK);
-
-		rlImGuiBegin();
-
-		ImGui::Begin(" ", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
-		ImGui::SetWindowSize(ImVec2(width, height));
-
-		static float percent = 0.0f;
-		ImGui::ProgressBar(percent, ImVec2(0.0f, 0.0f));
-		ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-		ImGui::Text("BuddyAllocator");
-
-		ImGui::Spacing();
-
-		ImDrawList* draw = ImGui::GetWindowDrawList();
-		ImVec2 p = ImGui::GetCursorScreenPos();
-
-		float blockWidth = 40.0f;
-		float blockHeight = 20.0f;
-		for (int i = 0; i < poolNum;i++) {
-			bool used = poolAllocator.GetUsed(i);
-			ImU32 col = used ? IM_COL32(255,0,0,255) : IM_COL32(0,255,0,255);
-			
-			draw->AddRectFilled(ImVec2(p.x + i * blockWidth, p.y), ImVec2(p.x + (i + 1) * blockWidth - 1, p.y + blockHeight), col);
-
-		}
-
-		if (ImGui::IsKeyPressed(ImGuiKey_Q, false)) { // Request from BuddyAllocator
-			void *ptr = buddyAllocator.Request(30);
-			if (ptr) {
-				buddyPtrs.push_back(ptr);
-			}
-
-			BuddyStats buddyStats = buddyAllocator.GetStats();
-			MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyStats);
-
-			MemoryTracker::Instance().GetAllocatorStats(buddyAllocator.GetId(), buddyStats);
-			percent = (float)buddyStats.usedMemory / buddyStats.capacity;
-		}
-		if (ImGui::IsKeyPressed(ImGuiKey_E, false) && buddyPtrs.size() > 0) { // Free from BuddyAllocator
-			int randomIdx = std::rand() % buddyPtrs.size();
-			if (buddyAllocator.Free(buddyPtrs[randomIdx])) {
-				buddyPtrs.erase(buddyPtrs.begin() + randomIdx);
-
-				BuddyStats buddyStats = buddyAllocator.GetStats();
-				MemoryTracker::Instance().TrackAllocator(buddyAllocator.GetId(), buddyStats);
-				MemoryTracker::Instance().GetAllocatorStats(buddyAllocator.GetId(), buddyStats);
-				percent = (float)buddyStats.usedMemory / buddyStats.capacity;
-			}
-		}
-
-		if (ImGui::IsKeyPressed(ImGuiKey_R, false)) { // Request from PoolAllocator
-			void* ptr = poolAllocator.Request();
-			if (ptr) {
-				poolPtrs.push_back(ptr);
-			}
-
-			PoolStats poolStats = poolAllocator.GetStats();
-			MemoryTracker::Instance().TrackAllocator(poolAllocator.GetId(), poolStats);
-		}
-		if (ImGui::IsKeyPressed(ImGuiKey_T, false) && poolPtrs.size() > 0) { // Free from PoolAllocator
-			int randomIdx = std::rand() % poolPtrs.size();
-			if (poolAllocator.Free(poolPtrs[randomIdx])) {
-				poolPtrs.erase(poolPtrs.begin() + randomIdx);
-
-				PoolStats poolStats = poolAllocator.GetStats();
-				MemoryTracker::Instance().TrackAllocator(poolAllocator.GetId(), poolStats);
-			}
-		}
-
-		ImGui::End();
-
-		rlImGuiEnd();
-
-		EndDrawing();
+		interface.Update();
 	}
 
 	CloseWindow();
