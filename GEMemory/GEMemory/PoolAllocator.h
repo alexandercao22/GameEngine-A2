@@ -53,8 +53,8 @@ public:
 
 	// Returns the current stats for the allocator
 	PoolStats GetStats();
-
 	bool GetUsed(int index);
+	int GetNumSlots();
 
 	// Debug functionality
 

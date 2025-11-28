@@ -217,6 +217,11 @@ bool PoolAllocator::GetUsed(int index) {
 	return _blocks[k].nodes[i].free;
 }
 
+int PoolAllocator::GetNumSlots()
+{
+	return _n * _blocks.size();
+}
+
 // Debug
 void* PoolAllocator::GetAdress(size_t index) {
 	return _blocks.at(index).address;
