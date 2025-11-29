@@ -191,6 +191,14 @@ void Interface::ShowBuddyInfo()
 	ImGui::ProgressBar(buddyPercent, ImVec2(0.0f, 0.0f));
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 	ImGui::Text("Used");
+
+	for (int i = 0; i < nBuddies; i++) {
+		BuddyContainer *currBuddy = &_buddies[i];
+
+		if (currentBuddy == currBuddy->buddy->GetId()) {
+			currBuddy->buddy->DrawInterface();
+		}
+	}
 }
 
 void Interface::ShowStackInfo()

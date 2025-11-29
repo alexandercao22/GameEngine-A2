@@ -42,6 +42,7 @@ public:
 	void *GetAddress();
 	// Prints the state of every possible buddy
 	void PrintStates();
+	void DrawInterface();
 };
 
 // Buddy Allocator:

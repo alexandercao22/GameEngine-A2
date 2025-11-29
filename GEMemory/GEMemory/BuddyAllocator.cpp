@@ -4,6 +4,10 @@
 #include <cmath>
 #include <malloc.h>
 
+#include "raylib.h"
+#include "imgui.h"
+#include "rlImGui.h"
+
 int BuddyAllocator::_nextId = 0; // Set the initial id
 
 BuddyAllocator::~BuddyAllocator()
@@ -236,4 +240,53 @@ void BuddyAllocator::PrintStates()
 		std::cout << space << _buddies[i].state;
 	}
 	std::cout << std::endl << std::endl;
+}
+
+void BuddyAllocator::DrawInterface()
+{
+	ImDrawList *draw = ImGui::GetWindowDrawList();
+	ImVec2 origin = ImGui::GetCursorScreenPos();
+
+	const float blockHeight = 20.0f;
+	const float blockSpacing = 8.0f;
+	const float totalWidth = 600.0f;
+
+	int maxLevel = std::log2(_size) - std::log2(_maxDepthSize);
+
+	for (int level = 0; level <= maxLevel; level++) {
+		int numBlocks = 1 << level;
+		float y = origin.y + level * (blockHeight + blockSpacing);
+		int index = numBlocks - 1;
+		for (int i = 0; i < numBlocks; i++) {
+			float x0 = floorf(origin.x + (float(i) / numBlocks) * totalWidth);
+			float x1 = floorf(origin.x + (float(i + 1) / numBlocks) * totalWidth);
+
+			ImU32 color = IM_COL32(200, 200, 200, 255);
+			if (_buddies[index + i].state == 0) {
+				color = IM_COL32(0, 255, 0, 255);
+			}
+			else if (_buddies[index + i].state == 1) {
+				color = IM_COL32(255, 0, 0, 255);
+			}
+			else if (_buddies[index + i].state == 2) {
+				color = IM_COL32(255, 255, 0, 255);
+			}
+
+			// Draw rectangle
+			draw->AddRectFilled(
+				ImVec2(x0, y),
+				ImVec2(x1, y + blockHeight),
+				color
+			);
+
+			draw->AddRect(
+				ImVec2(x0, y),
+				ImVec2(x1, y + blockHeight),
+				IM_COL32(0, 0, 0, 255)
+			);
+		}  
+	}
+
+	// Move cursor so ImGui continues below the diagram
+	ImGui::Dummy(ImVec2(totalWidth, (maxLevel + 1) *(blockHeight + blockSpacing)));
 }
