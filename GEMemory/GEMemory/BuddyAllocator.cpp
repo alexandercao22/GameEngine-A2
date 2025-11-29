@@ -148,53 +148,57 @@ bool BuddyAllocator::Free(void *element)
 		return false;
 	}
 
-	for (int i = 0; i < _numBuddies; i) {
-		Buddy *current = &_buddies[i];
-		if (current->state == 2) { // Current is split
-			Buddy *temp = &_buddies[i * 2 + 2];
-			if ((char *)element >= (char *)temp->ptr) { // Element is in right hand buddy
-				i = i * 2 + 2;
-			}
-			else { // Element is in left hand buddy
-				i = i * 2 + 1;
-			}
-			continue;
-		}
-		else if (current->state == 1) { // Current is used
+	int i = 0;
+	Buddy *current = nullptr;
+	Buddy *buddy = nullptr;
+	for (i = 0; i < _numBuddies; i++) {
+		if (_buddies[i].ptr == element && _buddies[i].state == 1) {
+			current = &_buddies[i];
 			current->state = 0;
 			_usedMemory -= current->size;
 			if (TRACK_MEMORY) {
 				MemoryTracker::Instance().StopTracking(current->ptr);
 			}
-#ifdef DEBUG
-			std::cout << "Free(" << i << ")" << std::endl;
-			std::cout << "Used(" << _usedMemory << "/" << _size << ")" << std::endl;
-			PrintStates();
-#endif
-			if (i == 0) {
-				return true;
-			}
 
-			if (i % 2 == 0) { // Current is right hand buddy
-				if (_buddies[i - 1].state == 0) {
-					_buddies[(i - 2) / 2].state = 0;
-				}
+			if (i % 2 == 1) { // Current is left
+				// Buddy is right
+				buddy = &_buddies[i + 1];
 			}
-			else { // Current is left hand buddy
-				if (_buddies[i + 1].state == 0) {
-					_buddies[(i - 1) / 2].state = 0;
-				}
+			else { // Current is right
+				// Buddy is left
+				buddy = &_buddies[i - 1];
 			}
-
-			return true;
-		}
-		else {
-			std::cerr << "BuddyAllocator::Free(): All memeory is already free" << std::endl;
-			return false;
+			break;
 		}
 	}
 
-	return false;
+	if (buddy == nullptr) {
+		std::cerr << "BuddyAllocator::Free(): Could not find the buddy of the freed element" << std::endl;
+		return false;
+	}
+
+	while (i > 0) {
+		if (buddy->state == 0) {
+			i = (i - 1) / 2;
+			Buddy *parent = &_buddies[i];
+			parent->state = 0;
+			current = parent;
+		}
+		else {
+			break;
+		}
+
+		if (i % 2 == 1) { // Current is left
+			// Buddy is right
+			buddy = &_buddies[i + 1];
+		}
+		else { // Current is right
+			// Buddy is left
+			buddy = &_buddies[i - 1];
+		}
+	}
+
+	return true;
 }
 
 BuddyStats BuddyAllocator::GetStats()
