@@ -73,6 +73,16 @@ void Interface::ShowPoolInfo()
 	}
 
 	// Info
+	for (int i = 0; i < nPools; i++) {
+		PoolContainer *currPool = &_pools[i];
+
+		if (currentPool == currPool->pool->GetId()) {
+			PoolStats poolStats = currPool->pool->GetStats();
+			ImGui::Text(("Bytes used: " + std::to_string(poolStats.usedMemory) + "/" + std::to_string(poolStats.capacity)).c_str());
+			break;
+		}
+	}
+
 	ImGui::ProgressBar(poolPercent, ImVec2(0.0f, 0.0f));
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 	ImGui::Text("Used");
@@ -168,6 +178,16 @@ void Interface::ShowBuddyInfo()
 	}
 
 	// Info
+	for (int i = 0; i < nBuddies; i++) {
+		BuddyContainer *currBuddy = &_buddies[i];
+
+		if (currentBuddy == currBuddy->buddy->GetId()) {
+			BuddyStats buddyStats = currBuddy->buddy->GetStats();
+			ImGui::Text(("Bytes used: " + std::to_string(buddyStats.usedMemory) + "/" + std::to_string(buddyStats.capacity)).c_str());
+			break;
+		}
+	}
+
 	ImGui::ProgressBar(buddyPercent, ImVec2(0.0f, 0.0f));
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 	ImGui::Text("Used");
@@ -198,9 +218,9 @@ void Interface::ShowStackInfo()
 	static int size = 0;
 	ImGui::InputInt("Size", &size);
 
-	const int nBuddies = stackAllocators.size();
-	if (ImGui::Button("Allocate") && nBuddies > 0) {
-		for (int i = 0; i < nBuddies; i++) {
+	const int nStacks = stackAllocators.size();
+	if (ImGui::Button("Allocate") && nStacks > 0) {
+		for (int i = 0; i < nStacks; i++) {
 			StackContainer *currStack = &_stacks[i];
 
 			if (currentStack == currStack->stack->GetId()) {
@@ -221,8 +241,8 @@ void Interface::ShowStackInfo()
 
 	// Free
 	// There needs to be at least 1 active stack allocator
-	if (ImGui::Button("Free") && nBuddies > 0) {
-		for (int i = 0; i < nBuddies; i++) {
+	if (ImGui::Button("Free") && nStacks > 0) {
+		for (int i = 0; i < nStacks; i++) {
 			StackContainer *currStack = &_stacks[i];
 
 			if (currentStack == currStack->stack->GetId() && currStack->ptrs.size() > 0) {
@@ -242,6 +262,16 @@ void Interface::ShowStackInfo()
 	}
 
 	// Info
+	for (int i = 0; i < nStacks; i++) {
+		StackContainer *currStack = &_stacks[i];
+
+		if (currentStack == currStack->stack->GetId()) {
+			StackStats stackStats = currStack->stack->GetStats();
+			ImGui::Text(("Bytes used: " + std::to_string(stackStats.usedMemory) + "/" + std::to_string(stackStats.capacity)).c_str());
+			break;
+		}
+	}
+
 	ImGui::ProgressBar(stackPercent, ImVec2(0.0f, 0.0f));
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 	ImGui::Text("Used");
