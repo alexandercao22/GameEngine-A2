@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Libraries\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Libraries\Includes;%(AdditionalDependencies)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -117,6 +117,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)Libraries\Includes;%(AdditionalDependencies)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,11 +132,14 @@
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="Interface.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)Libraries\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="MemoryTracker.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
     <ClCompile Include="rlImGui.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
+    <ClCompile Include="TestCases.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuddyAllocator.h" />
@@ -145,6 +149,7 @@
     <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="StackAllocator.h" />
+    <ClInclude Include="TestCases.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
