@@ -135,7 +135,7 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 bool BuddyAllocator::Free(void *element)
 {
 	char *elementPtr = (char *)element;
-	if (elementPtr < (char *)_memory || elementPtr > (char *)_buddies[_numBuddies].ptr) {
+	if (elementPtr < (char *)_memory || elementPtr > (char *)_buddies[_numBuddies - 1].ptr) {
 		std::cerr << "BuddyAllocator::Free(): Element is not within this allocator" << std::endl;
 		return false;
 	}
