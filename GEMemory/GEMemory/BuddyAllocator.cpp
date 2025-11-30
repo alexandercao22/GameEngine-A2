@@ -88,54 +88,46 @@ void *BuddyAllocator::Request(unsigned int size, std::string tag)
 		return nullptr;
 	}
 
-	int parentIdx = 0;
-	for (int i = 0; i < _numBuddies; i++) {
+	int i = 0;
+	int maxIndex = (1 << (int)(std::log2(_size) - std::log2(size) + 1)) - 1;
+	while (i < maxIndex) {
 		Buddy *current = &_buddies[i];
-		if (size <= current->size / 2) { // Traverse to a fitting buddy size
-			if (current->state == 0) {
-				current->state = 2;
-				parentIdx = i;
-				i = i * 2; // Skip to the next level
-				continue;
-			}
-			else if (current->state == 2) {
-				parentIdx = i;
-				i = i * 2; // Skip to the next level
-				continue;
-			}
-			else {
-				continue;
+		if (current->state == 0) {
+			if (size <= current->size) {
+				if (size > current->size / 2 || current->size == _maxDepthSize) { // Found a free slot for the desired size
+					current->state = 1;
+					_usedMemory += current->size;
+					if (TRACK_MEMORY) {
+						MemoryTracker::Instance().StartTracking(Allocator::Buddy, _id, current->ptr, current->size, tag);
+					}
+					return current->ptr;
+				}
+				else { // Split
+					current->state = 2;
+					i = i * 2 + 1;
+				}
 			}
 		}
-		else { // Found a fitting buddy size
-			if (current->state == 0) {
-				current->state = 1;
-				_usedMemory += current->size;
-				if (TRACK_MEMORY) {
-					MemoryTracker::Instance().StartTracking(Allocator::Buddy, _id, current->ptr, current->size, tag);
-				}
-#ifdef DEBUG
-				std::cout << "Index(" << i << ")" << std::endl;
-				std::cout << "Used(" << _usedMemory << "/" << _size << ")" << std::endl;
-				PrintStates();
-#endif
-				return current->ptr;
+		else if (current->state == 1) {
+			// If right side buddy go back until current is a left side buddy
+			while (i % 2 == 0 && i < maxIndex - 1) {
+				i = (i - 1) / 2;
 			}
-			else if (current->state == 2 && i % 2 == 1) { // Current is split, move on to its buddy
+			i++;
+		}
+		else if (current->state == 2) {
+			if (size > current->size / 2) {
+				while (i % 2 == 0 && i < maxIndex - 1) {
+					i = (i - 1) / 2;
+				}
+				i++;
 				continue;
 			}
-			else if (i % 2 == 0) { // Both buddies of a parent are used, move on to parents buddy
-				if (_buddies[i + 1].size < size) { // If traversed to the last buddy in the desired level
-					std::cerr << "BuddyAllocator::Request(): Could not find a free slot for the specified size" << std::endl;
-					return nullptr;
-				}
-				i = parentIdx;
-				while (i % 2 == 0 && _buddies[i].state != 0) {
-					i = (i - 2) / 2;
-				}
-			}
+			i = i * 2 + 1;
 		}
 	}
+
+	std::cerr << "BuddyAllocator::Request(): Could not find a free slot for the requested size" << std::endl;
 
 	return nullptr;
 }
