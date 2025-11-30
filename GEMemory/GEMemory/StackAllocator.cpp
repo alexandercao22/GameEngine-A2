@@ -78,6 +78,9 @@ StackStats StackAllocator::GetStats()
 
 bool StackAllocator::Reset() {
 	_head = _start;
+	while (_index != -1) {
+		Free();
+	}
 	_index = -1;
 
 	return true;

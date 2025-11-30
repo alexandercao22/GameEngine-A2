@@ -2,6 +2,7 @@
 #include "PoolAllocator.h"
 #include "StackAllocator.h"
 #include "BuddyAllocator.h"
+#include "TestCases.h"
 
 #include "Interface.h"
 #include "Objects.h"
@@ -73,104 +74,70 @@ void TestPool() {
 		}
 	}
 
-	//std::cout << "First value: " << firstPtr->health << std::endl;
-	//std::cout << "First value: " << firstPtr->legs << std::endl;
-	//std::cout << "First value: " << firstPtr->tag << std::endl;
-	//std::cout << "F�rsta pointers adress: " << firstPtr << std::endl;
-
-	//Enemy *secondPtr = (Enemy *)firstPool.Request();
-	//firstPtr->health = 12.34f;
-	//firstPtr->legs = 27;
-	//firstPtr->tag = 'y';
-
-	//std::cout << "Second value: " << firstPtr->health << std::endl;
-	//std::cout << "Second value: " << firstPtr->legs << std::endl;
-	//std::cout << "Second value: " << firstPtr->tag << std::endl;
-	//std::cout << "Andra pointers adress: " << secondPtr << std::endl;
-
-	//void* thirdPtr = firstPool.Request();
-
-	//std::cout << "Tredje pointers adress: " << thirdPtr << std::endl;
-
-	//void* fourthPtr = firstPool.Request();
-
-	//std::cout << "Fj�rde pointers adress: " << fourthPtr << std::endl;
-
-	//void* fifthPtr = firstPool.Request();
-
-	//std::cout << "Femte pointers adress: " << fifthPtr << std::endl;
-
-	//firstPool.Free(secondPtr);
-
-	//void* sixthPtr = firstPool.Request();
-
-	//std::cout << "Sj�tte pointers adress: " << sixthPtr << std::endl;
-	//
-
-	//void* seventhPtr = firstPool.Request();
-	//
-	//std::cout << "Sjunde pointers adress: " << seventhPtr << std::endl;
-
-	//std::cout << "SecondPool: " << secondPool.GetAdress(0) << std::endl;
-	//std::cout << "SecondPool: " << secondPool.GetAdress() << std::endl;
-
 	std::cout << std::endl;
 }
 
 void TestPoolTime() {
-	int nrOfObjects = 50000;
-
-	/* Running 2 loops, one uses new and delete each iteration the other uses poolallocation
-	* Both loops are nestled which means for each outer iteration we can reuse the space from
-	* PoolAllocation
-	*/
-
+	int startObjects = 2000;
+	std::cout << "Testing PoolAllocation " << std::endl;
 	auto t0 = std::chrono::high_resolution_clock::now();
 
-	std::vector<Enemy *> enemies;
+	PoolAllocator pool;
+	pool.Init(startObjects, sizeof(Enemy));
+	std::vector<Enemy*> live;
 
+	const int FRAMES = 100'000;
 
-	for (int i = 0; i < nrOfObjects; i++) {
-		for (int k = 0; k < 10; k++) {
-			Enemy *enemy = new Enemy;
-			enemies.push_back(enemy);
+	for (int f = 0; f < FRAMES; f++) {
+
+		// Allocate some random objects
+		int allocCount = rand() % 1000;
+		for (int i = 0; i < allocCount; i++) {
+			Enemy* e = (Enemy*)pool.Request();
+			live.push_back(e);
 		}
 
-		for (auto enemy : enemies) {
-			delete enemy;
+		// Free some random objects
+		int freeCount = rand() % 1000;
+		for (int i = 0; i < freeCount && !live.empty(); i++) {
+			int index = rand() % live.size();
+			pool.Free(live[index]);
+			live.erase(live.begin() + index);
 		}
-		enemies.clear();
 	}
 	auto t1 = std::chrono::high_resolution_clock::now();
-
 	std::chrono::duration<double> duration = t1 - t0;
-	std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
 
+	std::cout << "OS PoolAllocation Execution time: " << duration.count() << std::endl;
+	
+	std::cout << "Testing OS new/delete " << std::endl;
 	t0 = std::chrono::high_resolution_clock::now();
 
-	PoolAllocator PoolAlloc;
-	PoolAlloc.Init(20, sizeof(Enemy));
+	std::vector<Enemy*> live2;
 
-	std::vector<Enemy *> enemies2;
+	
+	for (int f = 0; f < FRAMES; f++) {
 
-
-	for (int i = 0; i < nrOfObjects; i++) {
-		for (int k = 0; k < 10; k++) {
-			Enemy *enemy = (Enemy *)PoolAlloc.Request();
-			enemies2.push_back(enemy);
-
+		// Allocate some random objects
+		int allocCount = rand() % 1000;
+		for (int i = 0; i < allocCount; i++) {
+			Enemy* e = new Enemy;
+			live2.push_back(e);
 		}
-		for (auto enemy : enemies2) {
-			PoolAlloc.Free(enemy);
+
+		// Free some random objects
+		int freeCount = rand() % 1000;
+		for (int i = 0; i < freeCount && !live2.empty(); i++) {
+			int index = rand() % live2.size();
+			delete live2[index];
+			live2.erase(live2.begin() + index);
 		}
-		enemies2.clear();
 	}
-
-
 	t1 = std::chrono::high_resolution_clock::now();
-
 	duration = t1 - t0;
-	std::cout << "OS PoolAllocator Execution time: " << duration.count() << std::endl;
+
+	std::cout << "OS new/delete Execution time: " << duration.count() << std::endl;
+
 }
 
 void TestBuddy() {
@@ -178,22 +145,7 @@ void TestBuddy() {
 
 	BuddyAllocator buddyAllocator;
 	buddyAllocator.Init(512);
-	//void *ptr1 = buddyAllocator.Request(32);
-	//buddyAllocator.PrintStates();
-	//void *ptr2 = buddyAllocator.Request(64);
-	//buddyAllocator.PrintStates();
-	//void *ptr3 = buddyAllocator.Request(30);
-	//buddyAllocator.PrintStates();
 
-	//buddyAllocator.Free(ptr3);
-	//buddyAllocator.PrintStates();
-	//buddyAllocator.Free(ptr1);
-	//buddyAllocator.PrintStates();
-
-	//ptr3 = buddyAllocator.Request(30);
-	//buddyAllocator.PrintStates();
-	//ptr1 = buddyAllocator.Request(129);
-	//buddyAllocator.PrintStates();
 
 	std::vector<void *> ptrs;
 	for (int i = 0; i < 16; i++) {
@@ -259,64 +211,71 @@ void TestBuddy2() {
 }
 
 void TestStack() {
-	std::cout << "Testing StackAllocator" << std::endl;
 
+	std::cout << "Testing OS Allocator" << std::endl;
+	// testing variables
+	int nrOfIterations = 10000;
+	int nrOfObjects = 100;
+
+	// Testing allocations framewise with "fixed size" enemies
+	auto t0 = std::chrono::high_resolution_clock::now();
+	std::vector<Enemy*> enemies;
+
+	for (int i = 0; i < nrOfIterations; i++) {
+		for (int k = 0; k < nrOfObjects; k++) {
+			Enemy* enemy = new Enemy;
+			enemies.push_back(enemy);
+		}
+
+		for (auto enemy : enemies) {
+			delete enemy;
+		}
+		enemies.clear();
+	}
+	auto t1 = std::chrono::high_resolution_clock::now();
+	
+	std::chrono::duration<double> duration = t1 - t0;
+	std::cout << "OS Allocator exection time" << duration.count() << std::endl;
+
+	
+	std::cout << "Testing StackAllocator: " << std::endl;
+	// Testing allocation framewise with our Stack
+	// reseting each iteration instead of deleting them
 	StackAllocator firstStack;
 	firstStack.Initialize(100000);
-	auto t0 = std::chrono::high_resolution_clock::now();
-	while (true) {
-		for (int i = 0; i < 1000; i++) {
-			int size = rand() % 100;
-			void* ptr = firstStack.Request(size);
+	t0 = std::chrono::high_resolution_clock::now();
+	
+	for (int i = 0; i < nrOfIterations; i++) {
+		for (int k = 0; k < nrOfObjects; k++) {
+			/*int size = rand() % 100;*/
+			void* ptr = firstStack.Request(sizeof(Enemy));
 		}
 		firstStack.Reset();
-		auto t1 = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> duration = t1 - t0;
 		
-		if (duration.count() > 5) {
-			break;
-		}
 	}
-
-	StackAllocator secondStack;
-	secondStack.Initialize(600);
-
-	Enemy *firstPtr = (Enemy *)firstStack.Request(sizeof(Enemy));
-	std::cout << "firstPtr address: " << firstPtr << std::endl;
-
-	firstPtr->health = 69.67f;
-	firstPtr->legs = 2;
-	firstPtr->tag = 'b';
-
-	std::cout << "First value: " << firstPtr->health << std::endl;
-	std::cout << "First value: " << firstPtr->legs << std::endl;
-	std::cout << "First value: " << firstPtr->tag << std::endl;
-	std::cout << "firstPtr address: " << firstPtr << std::endl;
-
-	Enemy *secondPtr = (Enemy *)firstStack.Request(sizeof(Enemy));
-	secondPtr->health = 13.37f;
-	secondPtr->legs = 2;
-	secondPtr->tag = 'c';
-
-	std::cout << "Second value: " << secondPtr->health << std::endl;
-	std::cout << "Second value: " << secondPtr->legs << std::endl;
-	std::cout << "Second value: " << secondPtr->tag << std::endl;
-	std::cout << "secondPtr address: " << secondPtr << std::endl;
-
-	firstStack.Free();
-
-	MainCharacter *thirdPtr = (MainCharacter *)firstStack.Request(sizeof(MainCharacter));
-	thirdPtr->dmg = 14.86;
-
-	std::cout << "Third value: " << thirdPtr->dmg << std::endl;
-	std::cout << "thirdPtr address: " << thirdPtr << std::endl;
+	t1 = std::chrono::high_resolution_clock::now();
+	duration = t1 - t0;
+		
+	std::cout << "StackAllocator exection time: " << duration.count() << std::endl;
 
 
-	MainCharacter *fourthPtr = (MainCharacter *)firstStack.Request(sizeof(MainCharacter));
-	fourthPtr->dmg = 19.19;
+	std::cout << "Testing OS Stack " << std::endl;
+	// Testing variables in the OS Stack
+	t0 = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < nrOfIterations; i++) {
+		for (int k = 0; k < nrOfObjects; k++) {
+			Enemy enemy;
+			enemy.health = 100;
+			enemy.legs = 2;
+			enemy.tag = 'a';
+		}
 
-	std::cout << "Fourth value: " << fourthPtr->dmg << std::endl;
-	std::cout << "fourthPtr address: " << fourthPtr << std::endl;
+	}
+	t1 = std::chrono::high_resolution_clock::now();
+
+	duration = t1 - t0;
+
+	std::cout << "OS Stack exection time: " << duration.count() << std::endl;
 
 	std::cout << std::endl;
 
@@ -373,5 +332,7 @@ int main() {
 
 	CloseWindow();
 
+	//PoolVSOS();
+	testAll();
 	return 0;
 }
