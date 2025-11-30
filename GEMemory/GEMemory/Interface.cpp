@@ -364,7 +364,7 @@ void Interface::Update()
 		else if (currentType == 2) { // Stack
 			StackContainer sCon;
 			sCon.stack = new StackAllocator;
-			if (sCon.stack->Initialize(size)) {
+			if (sCon.stack->Init(size)) {
 				_stacks.push_back(sCon);
 			}
 		}

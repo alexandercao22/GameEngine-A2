@@ -2,7 +2,7 @@
 
 int StackAllocator::_nextId = 0;
 
-bool StackAllocator::Initialize(int size) {
+bool StackAllocator::Init(int size) {
 
 	_size = size;
 	_start = malloc(size);

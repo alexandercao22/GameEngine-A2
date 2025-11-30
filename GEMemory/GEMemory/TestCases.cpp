@@ -1,7 +1,9 @@
+#include "TestCases.h"
+
 #include "PoolAllocator.h"
 #include "StackAllocator.h"
 #include "BuddyAllocator.h"
-#include "TestCases.h"
+#include "Objects.h"
 
 #include <chrono>
 #include <iostream>
@@ -148,13 +150,12 @@ void StackVsOS() {
 	// Testing allocation framewise with our Stack
 	// reseting each iteration instead of deleting them
 	StackAllocator firstStack;
-	firstStack.Initialize(100000);
+	firstStack.Init(100000);
 	t0 = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < nrOfIterations; i++) {
 		nrOfObjects = rng() % 1000;
 		for (int k = 0; k < nrOfObjects; k++) {
-			/*int size = rand() % 100;*/
 			void* ptr = firstStack.Request(sizeof(Enemy));
 		}
 		firstStack.Reset();
@@ -176,10 +177,6 @@ void StackVsOS() {
 			enemy.legs = 2;
 			enemy.tag = 'a';
 		}
-
-		/*	if (i % 100 == 0)
-				std::cout << "iteraions" << std::endl;
-		*/
 	}
 	t1 = std::chrono::high_resolution_clock::now();
 
@@ -189,7 +186,7 @@ void StackVsOS() {
 
 }
 
-void testAll() {
+void TestAll() {
 	int frames = 100'000;
 	int objects = 10;
 	double poolTime[10];
@@ -226,7 +223,7 @@ void testAll() {
 		t0 = std::chrono::high_resolution_clock::now();
 		std::vector<Enemy*> stackPtrs;
 		StackAllocator stack;
-		stack.Initialize(12 * sizeof(Enemy));
+		stack.Init(12 * sizeof(Enemy));
 
 		for (int i = 0; i < frames; i++) {
 			for (int y = 0; y < objects; y++) {
