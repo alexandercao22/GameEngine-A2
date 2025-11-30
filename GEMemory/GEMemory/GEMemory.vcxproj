@@ -136,7 +136,6 @@
     <ClCompile Include="PoolAllocator.cpp" />
     <ClCompile Include="rlImGui.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
-    <ClCompile Include="TestCases.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuddyAllocator.h" />
@@ -146,7 +145,6 @@
     <ClInclude Include="PoolAllocator.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="StackAllocator.h" />
-    <ClInclude Include="TestCases.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
