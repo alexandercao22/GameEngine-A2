@@ -1,6 +1,7 @@
 #include "BuddyAllocator.h"
 
 #include <iostream>
+#include <string>
 #include <cmath>
 #include <malloc.h>
 
@@ -22,10 +23,16 @@ BuddyAllocator::~BuddyAllocator()
 
 bool BuddyAllocator::Init(unsigned int size)
 {
+	// Check if size is smaller than lower limit (32)
+	if (size < _maxDepthSize) {
+		std::cerr << "BuddyAllocator::Init(): Minimun allocator size is: " << std::to_string(_maxDepthSize) << std::endl;
+		return false;
+	}
+
 	// Check if size is of base 2
 	float log2Size = std::log(size) / std::log(2);
 	if (ceilf(log2Size) != log2Size) {
-		std::cerr << "BuddyAllocator::Init(): Failed to initalize" << std::endl;
+		std::cerr << "BuddyAllocator::Init(): Size is required to be of base 2" << std::endl;
 		return false;
 	}
 
