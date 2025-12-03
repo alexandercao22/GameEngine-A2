@@ -29,13 +29,13 @@ inline std::string FormatTimePoint(const std::chrono::system_clock::time_point& 
 }
 
 int main() {
-	Interface interface;
+	//Interface interface;
 
-	while (!WindowShouldClose()) {
+	/*while (!WindowShouldClose()) {
 		interface.Update();
 	}
 
-	CloseWindow();
+	CloseWindow();*/
 
 	//PoolVSOS();
 	TestAll();
