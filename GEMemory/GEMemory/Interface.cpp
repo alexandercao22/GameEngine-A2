@@ -2,7 +2,10 @@
 
 #include "MemoryTracker.h"
 
+#include <ctime>
+#include <sstream>
 #include <cstdlib>
+#include <iomanip>
 #include "raylib.h"
 #include "imgui.h"
 #include "rlImGui.h"
@@ -88,20 +91,53 @@ void Interface::ShowPoolInfo()
 	ImGui::Text("Used");
 
 	for (int i = 0; i < nPools; i++) {
-		PoolAllocator *currPool = _pools[i].pool;
+		PoolContainer *currPool = &_pools[i];
 
-		if (currentPool == currPool->GetId()) {
+		if (currentPool == currPool->pool->GetId()) {
 			ImDrawList *draw = ImGui::GetWindowDrawList();
 			ImVec2 p = ImGui::GetCursorScreenPos();
 
-			int poolNum = currPool->GetNumSlots();
+			int poolNum = currPool->pool->GetNumSlots();
 			float blockWidth = 40.0f;
 			float blockHeight = 20.0f;
-			for (int i = 0; i < poolNum; i++) {
-				bool used = currPool->GetUsed(i);
+			for (int j = 0; j < poolNum; j++) {
+				bool used = currPool->pool->GetUsed(j);
 				ImU32 col = used ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 255, 0, 255);
 
-				draw->AddRectFilled(ImVec2(p.x + i * blockWidth, p.y), ImVec2(p.x + (i + 1) * blockWidth - 1, p.y + blockHeight), col);
+				draw->AddRectFilled(ImVec2(p.x + j * blockWidth, p.y), ImVec2(p.x + (j + 1) * blockWidth - 1, p.y + blockHeight), col);
+			}
+			ImGui::NewLine();
+			ImGui::NewLine();
+
+			// Show all allocations to the current pool allocator
+			std::unordered_map<void *, Allocation> allocations = MemoryTracker::Instance().GetAllocations();
+			int index = 0;
+			for (void *ptr : currPool->ptrs) {
+				Allocation allocation = allocations[ptr];
+				if (allocation.allocator == Allocator::Pool && allocation.allocatorId == currentPool) {
+					ImGui::Text(std::string("Allocator ID: " + std::to_string(allocation.allocatorId)).c_str());
+					const void *address = (const void *)allocation.ptr;
+					std::stringstream ss;
+					ss << address;
+					ImGui::Text(std::string("Pointer: " + ss.str()).c_str());
+					ImGui::Text(std::string("Size: " + std::to_string(allocation.size)).c_str());
+					ImGui::Text(std::string("Tag: " + allocation.tag).c_str());
+					ImGui::Text(std::string("Timestamp: " + FormatTimePoint(allocation.timestamp)).c_str());
+
+					std::string buttonText = "Free##" + std::to_string(index++);
+					if (ImGui::Button(buttonText.c_str())) {
+						currPool->pool->Free(allocation.ptr);
+
+						auto idx = std::find(currPool->ptrs.begin(), currPool->ptrs.end(), allocation.ptr);
+						currPool->ptrs.erase(idx);
+
+						// Update tracker
+						PoolStats poolStats = currPool->pool->GetStats();
+						MemoryTracker::Instance().TrackAllocator(currPool->pool->GetId(), poolStats);
+						poolPercent = (float)poolStats.usedMemory / poolStats.capacity;
+					}
+					ImGui::NewLine();
+				}
 			}
 
 			break;
@@ -198,6 +234,39 @@ void Interface::ShowBuddyInfo()
 		if (currentBuddy == currBuddy->buddy->GetId()) {
 			currBuddy->buddy->DrawInterface();
 		}
+		ImGui::NewLine();
+		ImGui::NewLine();
+
+		// Show all allocations to the current pool allocator
+		std::unordered_map<void *, Allocation> allocations = MemoryTracker::Instance().GetAllocations();
+		int index = 0;
+		for (auto &pair : allocations) {
+			Allocation allocation = pair.second;
+			if (allocation.allocator == Allocator::Buddy && allocation.allocatorId == currentBuddy) {
+				ImGui::Text(std::string("Allocator ID: " + std::to_string(allocation.allocatorId)).c_str());
+				const void *address = (const void *)allocation.ptr;
+				std::stringstream ss;
+				ss << address;
+				ImGui::Text(std::string("Pointer: " + ss.str()).c_str());
+				ImGui::Text(std::string("Size: " + std::to_string(allocation.size)).c_str());
+				ImGui::Text(std::string("Tag: " + allocation.tag).c_str());
+				ImGui::Text(std::string("Timestamp: " + FormatTimePoint(allocation.timestamp)).c_str());
+
+				std::string buttonText = "Free##" + std::to_string(index++);
+				if (ImGui::Button(buttonText.c_str())) {
+					currBuddy->buddy->Free(allocation.ptr);
+
+					auto idx = std::find(currBuddy->ptrs.begin(), currBuddy->ptrs.end(), allocation.ptr);
+					currBuddy->ptrs.erase(idx);
+
+					// Update tracker
+					BuddyStats buddyStats = currBuddy->buddy->GetStats();
+					MemoryTracker::Instance().TrackAllocator(currBuddy->buddy->GetId(), buddyStats);
+					buddyPercent = (float)buddyStats.usedMemory / buddyStats.capacity;
+				}
+				ImGui::NewLine();
+			}
+		}
 	}
 }
 
@@ -270,9 +339,9 @@ void Interface::ShowStackInfo()
 	}
 
 	// Info
+	StackContainer *currStack = nullptr;
 	for (int i = 0; i < nStacks; i++) {
-		StackContainer *currStack = &_stacks[i];
-
+		currStack = &_stacks[i];
 		if (currentStack == currStack->stack->GetId()) {
 			StackStats stackStats = currStack->stack->GetStats();
 			ImGui::Text(("Bytes used: " + std::to_string(stackStats.usedMemory) + "/" + std::to_string(stackStats.capacity)).c_str());
@@ -283,6 +352,40 @@ void Interface::ShowStackInfo()
 	ImGui::ProgressBar(stackPercent, ImVec2(0.0f, 0.0f));
 	ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 	ImGui::Text("Used");
+
+	ImGui::NewLine();
+	ImGui::NewLine();
+
+	// Show all allocations to the current pool allocator
+	std::unordered_map<void *, Allocation> allocations = MemoryTracker::Instance().GetAllocations();
+	int index = 0;
+	for (auto &pair : allocations) {
+		Allocation allocation = pair.second;
+		if (allocation.allocator == Allocator::Stack && allocation.allocatorId == currentStack) {
+			ImGui::Text(std::string("Allocator ID: " + std::to_string(allocation.allocatorId)).c_str());
+			const void *address = (const void *)allocation.ptr;
+			std::stringstream ss;
+			ss << address;
+			ImGui::Text(std::string("Pointer: " + ss.str()).c_str());
+			ImGui::Text(std::string("Size: " + std::to_string(allocation.size)).c_str());
+			ImGui::Text(std::string("Tag: " + allocation.tag).c_str());
+			ImGui::Text(std::string("Timestamp: " + FormatTimePoint(allocation.timestamp)).c_str());
+			ImGui::NewLine();
+		}
+	}
+}
+
+std::string Interface::FormatTimePoint(const std::chrono::system_clock::time_point &tp)
+{
+	std::time_t timeStamp = std::chrono::system_clock::to_time_t(tp);
+	std::tm localTime{};
+
+	localtime_s(&localTime, &timeStamp); // thread-safe Windows version
+
+	std::ostringstream oss;
+	oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
+	return oss.str();
+
 }
 
 Interface::Interface()

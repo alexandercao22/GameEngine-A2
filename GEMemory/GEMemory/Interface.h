@@ -35,6 +35,9 @@ private:
 	void ShowBuddyInfo();
 	void ShowStackInfo();
 
+	// Time to string formatting
+	std::string FormatTimePoint(const std::chrono::system_clock::time_point &tp);
+
 public:
 	Interface();
 	~Interface();
