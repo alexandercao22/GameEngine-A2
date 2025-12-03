@@ -4,15 +4,16 @@
 #include "raylib.h"
 
 int main() {
-	//Interface interface;
+	Interface interface;
 
-	/*while (!WindowShouldClose()) {
+	while (!WindowShouldClose()) {
 		interface.Update();
 	}
 
-	CloseWindow();*/
+	CloseWindow();
 
+	// Run tests
 	//PoolVSOS();
-	TestAll();
+	//TestAll();
 	return 0;
 }
